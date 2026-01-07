@@ -24,7 +24,7 @@ public class UserService {
     private final PostMapper postMapper;
     private final PasswordEncoder passwordEncoder;
 
-    //en liten kommentar bara.
+    //en liten kommentar bara.. uppdaterar igen då
     public UserService(UserRepository userRepository, UserMapper userMapper, PostMapper postMapper, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
