@@ -39,34 +39,29 @@ import java.util.Base64;
 public class SecurityConfig {
     @Bean   //SecurityFilterChain är en inbyggd metod som finns i Spring security
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http.csrf(AbstractHttpConfigurer::disable);     //Ett säkerhetstoken som vi nu har valt att stänga av
 
         http.sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        );
-
-        http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/request-token").permitAll());
-
-        http.authorizeHttpRequests(auth ->
-                auth.anyRequest().authenticated());
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwt ->
-                        jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-        );
+                        jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
         http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/request-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
-                .requestMatchers(   //Raden ovan och de tre nedan öppnar upp för att vem som helst ska kunna
+                .requestMatchers(//Raden ovan och de tre nedan öppnar upp för att vem som helst ska kunna
                         "/swagger-ui/**",   //gå in och skapa en ny user, detta för att vi i övrigt låst applikationen
                         "/v3/api-docs/**",  //Vi kan därmed skapa ett konto som har Admin för att sedan låsa framöver
                         "/swagger-ui.html"
                 ).permitAll()
+                .requestMatchers("/public/**").permitAll()
+
+                .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                .requestMatchers("/public/**").permitAll()
                 .anyRequest().authenticated());
         return http.build();
     }
