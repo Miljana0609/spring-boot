@@ -56,7 +56,7 @@ public class SecurityConfig {
                         "/swagger-ui/**",   //gå in och skapa en ny user, detta för att vi i övrigt låst applikationen
                         "/v3/api-docs/**",  //Vi kan därmed skapa ett konto som har Admin för att sedan låsa framöver
                         "/swagger-ui.html"
-                ).permitAll()
+                ).permitAll() //Hoppas det uppdateras nu
                 .requestMatchers("/public/**").permitAll()
 
                 .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
