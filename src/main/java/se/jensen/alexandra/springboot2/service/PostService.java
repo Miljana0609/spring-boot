@@ -25,7 +25,7 @@ public class PostService {
     }
     //Finns redan i UserController/UserService
 //    public List<PostResponseDTO> getAllPosts() {
-//        List<Post> posts = postRepository.findAll();
+//        List<Post> posts = postRepos3itory.findAll();
 //        return posts.stream().map(post -> new PostResponseDTO(
 //                post.getId(), post.getText(), post.getCreatedAt())).toList();
 //    }
