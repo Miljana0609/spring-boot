@@ -9,7 +9,7 @@ public record UserRequestDTO(
         Long id,
 
         @NotBlank(message = "Användarnamn får ej vara tomt.")
-        @Size(min = 3, max = 20, message = "Användarnamn måste vara mellan 3-20 tecken.")
+        @Size(min = 3, max = 50, message = "Användarnamn måste vara mellan 3-50 tecken.")
         String username,
 
         @Email(message = "Ogiltig e-postadress")

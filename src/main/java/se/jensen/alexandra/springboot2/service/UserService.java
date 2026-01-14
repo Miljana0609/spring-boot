@@ -1,5 +1,7 @@
 package se.jensen.alexandra.springboot2.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PostMapper postMapper;
@@ -32,9 +35,14 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public UserWithPostsResponseDTO getUserWithPosts(Long id) {
+        logger.info("Hämtar användare med id {} och dess inlägg", id);
         User user = userRepository.getUserWithPosts(id)
-                .orElseThrow(() -> new NoSuchElementException("Ingen användare finns med id: " + id));
+                .orElseThrow(() -> {
+                    logger.warn("Användare med id {} hittades inte", id);
+                    return new NoSuchElementException("Ingen användare finns med id: " + id);
+                });
 
         List<PostResponseDTO> posts = user.getPosts()
                 .stream()
@@ -43,60 +51,86 @@ public class UserService {
         return new UserWithPostsResponseDTO(userMapper.toDto(user), posts);
     }
 
+    @Transactional
     public List<UserResponseDTO> getAllUsers() {
+        logger.info("Hämtar alla användare");
         List<User> users = userRepository.findAll();
         return users.stream()
                 .map(userMapper::toDto).toList();
     }
 
+    @Transactional
     public UserResponseDTO getCurrentUser(MyUserDetails userDetails) {
         String username = userDetails.getUsername();
+        logger.info("Hämtar nuvarande användare: {}", username);
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NoSuchElementException("Användare hittades inte: " + username));
+                .orElseThrow(() -> {
+                    logger.warn("Användare {} hittades inte", username);
+                    return new NoSuchElementException("Användare hittades inte: " + username);
+                });
         return userMapper.toDto(user);
     }
 
+    @Transactional
     public UserResponseDTO findUserById(Long id) {
+        logger.info("Hämtar användare med id: {}", id);
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Ingen användare i databasen med id: " + id));
+                .orElseThrow(() -> {
+                    logger.warn("Användare med id {} hittades inte", id);
+                    return new NoSuchElementException("Ingen användare i databasen med id: " + id);
+                });
         return userMapper.toDto(user);
     }
 
     @Transactional
     public UserResponseDTO addUser(UserRequestDTO userDto) {
+        logger.info("Lägger till ny användare med användarnamn: {}", userDto.username());
         User user = userMapper.fromDto(userDto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         boolean userExists = userRepository.existsByUsernameOrEmail
                 (user.getUsername(), user.getEmail());
 
         if (userExists) {
+            logger.warn("Kunde inte lägga till användare. Användarnamn eller e-post finns redan: {}, {}", user.getUsername(), user.getEmail());
             throw new IllegalArgumentException("Användarnamn eller e-post finns redan i databasen");
         }
         User savedUser = userRepository.save(user);
+        logger.info("Användare skapad med id: {}", savedUser.getId());
         return userMapper.toDto(savedUser);
     }
 
     @Transactional
     public UserResponseDTO updateUser(UserRequestDTO userDto, Long id) {
+        logger.info("Uppdaterar användare med id: {}", id);
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Ingen användare i databasen med id: " + id));
+                .orElseThrow(() -> {
+                    logger.warn("Kunde inte uppdatera. Användare med id {} hittades inte", id);
+                    return new NoSuchElementException("Ingen användare i databasen med id: " + id);
+                });
         userMapper.fromDto(user, userDto);
 
         if (userDto.password() != null && !userDto.password().isEmpty()) {
             user.setPassword(passwordEncoder.encode(userDto.password()));
         }
         User updatedUser = userRepository.save(user);
+        logger.info("Användare med id {} uppdaterad", id);
         return userMapper.toDto(updatedUser);
     }
 
     @Transactional
     public void deleteUserById(Long id) {
+        logger.info("Tar bort användare med id: {}", id);
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Ingen användare i databasen med id: " + id));
+                .orElseThrow(() -> {
+                    logger.warn("Kunde inte ta bort. Användare med id {} hittades inte", id);
+                    return new NoSuchElementException("Ingen användare i databasen med id: " + id);
+                });
         userRepository.delete(user);
+        logger.info("Användare med id {} borttagen", id);
     }
 
     public Optional<User> getUserByUsername(String username) {
+        logger.info("Hämtar användare via användarnamn: {}", username);
         Optional<User> user = userRepository.findByUsername(username);
         return user;
     }

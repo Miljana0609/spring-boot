@@ -75,7 +75,6 @@ public class UserController {
     public ResponseEntity<PostResponseDTO> createPostForUser(
             @PathVariable Long userId,
             @Valid @RequestBody PostRequestDTO request) {
-
         return ResponseEntity.status(HttpStatus.CREATED).body(postService.createPost(userId, request));
     }
 

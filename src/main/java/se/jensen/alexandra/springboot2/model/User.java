@@ -8,7 +8,7 @@ import java.util.List;
 @Table(name = "app_user")
 public class User {
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Post> posts;
 
     @Id

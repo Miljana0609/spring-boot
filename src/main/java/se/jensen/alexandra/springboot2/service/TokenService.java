@@ -1,5 +1,7 @@
 package se.jensen.alexandra.springboot2.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class TokenService {
+    private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
 
     private final JwtEncoder jwtEncoder;
 
@@ -21,6 +24,7 @@ public class TokenService {
     }
 
     public String generateToken(Authentication authentication) {
+        logger.info("Genererar token för användare: {}", authentication.getName());
         Instant now = Instant.now();
 
         String scope = authentication.getAuthorities().stream()
@@ -35,8 +39,10 @@ public class TokenService {
                 .claim("scope", scope)
                 .build();
 
-        return jwtEncoder
+        String token = jwtEncoder
                 .encode(JwtEncoderParameters.from(claims))
                 .getTokenValue();
+        logger.debug("Token genererad framgångsrikt");
+        return token;
     }
 }

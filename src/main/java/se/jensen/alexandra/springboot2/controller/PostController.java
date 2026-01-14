@@ -1,6 +1,10 @@
 package se.jensen.alexandra.springboot2.controller;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import se.jensen.alexandra.springboot2.dto.PostRequestDTO;
@@ -15,17 +19,25 @@ public class PostController {
     public PostController(PostService postService) {
         this.postService = postService;
     }
+
     //Finns redan i UserController/UserService
-//    @GetMapping
-//    public ResponseEntity<List<PostResponseDTO>> getPosts() {
-//        return ResponseEntity.ok(postService.getAllPosts());
-//    }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<PostResponseDTO> getPostById
-//            (@PathVariable Long id) {
-//        return ResponseEntity.ok(postService.findPostById(id));
-//    }
+    @GetMapping("/posts")
+    public Page<PostResponseDTO> getPosts(
+            @PageableDefault(
+                    size = 10,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
+    ) {
+        return postService.getAllPosts(pageable);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PostResponseDTO> getPostById
+            (@PathVariable Long id) {
+        return ResponseEntity.ok(postService.findPostById(id));
+    }
 
 //    @PostMapping("/{userId}")
 //    public ResponseEntity<PostResponseDTO> createPost
