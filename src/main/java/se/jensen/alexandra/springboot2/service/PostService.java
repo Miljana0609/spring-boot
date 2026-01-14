@@ -36,7 +36,8 @@ public class PostService {
                 .map(post -> new PostResponseDTO(
                         post.getId(),
                         post.getText(),
-                        post.getCreatedAt()));
+                        post.getCreatedAt()
+                ));
     }
 
     public PostResponseDTO findPostById(Long id) {

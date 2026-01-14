@@ -126,8 +126,11 @@ public class User {
         return "User{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
+                ", email='" + email + '\'' +
                 ", role='" + role + '\'' +
+                ", displayName='" + displayName + '\'' +
+                ", bio='" + bio + '\'' +
+                ", profileImagePath='" + profileImagePath + '\'' +
                 '}';
     }
 }

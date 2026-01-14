@@ -1,9 +1,9 @@
 package se.jensen.alexandra.springboot2.dto;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public record UserWithPostsResponseDTO(
         UserResponseDTO user,
-        List<PostResponseDTO> posts
+        Page<PostResponseDTO> posts
 ) {
 }

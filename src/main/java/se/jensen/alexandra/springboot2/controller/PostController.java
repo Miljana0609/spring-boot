@@ -1,6 +1,7 @@
 package se.jensen.alexandra.springboot2.controller;
 
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,10 +22,12 @@ public class PostController {
     }
 
     //Finns redan i UserController/UserService
-    @GetMapping("/posts")
+    @GetMapping
     public Page<PostResponseDTO> getPosts(
+            @ParameterObject
             @PageableDefault(
-                    size = 10,
+                    //page = 0, 0 är default och behöver inte anges
+                    size = 5,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC
             )
@@ -38,13 +41,6 @@ public class PostController {
             (@PathVariable Long id) {
         return ResponseEntity.ok(postService.findPostById(id));
     }
-
-//    @PostMapping("/{userId}")
-//    public ResponseEntity<PostResponseDTO> createPost
-//            (@PathVariable Long userId,
-//             @Valid @RequestBody PostRequestDTO dto) {
-//        return ResponseEntity.status(HttpStatus.CREATED).body(postService.createPost(userId, dto));
-//    }
 
     @PutMapping("/{id}")
     public ResponseEntity<PostResponseDTO> updatePost

@@ -1,6 +1,10 @@
 package se.jensen.alexandra.springboot2.controller;
 
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -80,9 +84,18 @@ public class UserController {
 
     //Hämta alla inlägg från samt info om användare
     @GetMapping("/{id}/with-posts")
-    public ResponseEntity<UserWithPostsResponseDTO> getUserWithPosts
-    (@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserWithPosts(id));
+    public UserWithPostsResponseDTO getUserWithPosts(
+            @PathVariable Long id,
+            @ParameterObject
+            @PageableDefault(
+                    //page = 0, 0 är default och behöver inte anges
+                    size = 5,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            )
+            Pageable pageable
+    ) {
+        return userService.getUserWithPosts(id, pageable);
     }
 
 }

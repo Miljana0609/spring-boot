@@ -2,6 +2,8 @@ package se.jensen.alexandra.springboot2.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,7 @@ import se.jensen.alexandra.springboot2.dto.UserWithPostsResponseDTO;
 import se.jensen.alexandra.springboot2.mapper.PostMapper;
 import se.jensen.alexandra.springboot2.mapper.UserMapper;
 import se.jensen.alexandra.springboot2.model.User;
+import se.jensen.alexandra.springboot2.repository.PostRepository;
 import se.jensen.alexandra.springboot2.repository.UserRepository;
 import se.jensen.alexandra.springboot2.security.MyUserDetails;
 
@@ -26,17 +29,19 @@ public class UserService {
     private final UserMapper userMapper;
     private final PostMapper postMapper;
     private final PasswordEncoder passwordEncoder;
+    private final PostRepository postRepository;
 
     //en liten kommentar bara.. uppdaterar igen då
-    public UserService(UserRepository userRepository, UserMapper userMapper, PostMapper postMapper, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, PostMapper postMapper, PasswordEncoder passwordEncoder, PostRepository postRepository) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.postMapper = postMapper;
         this.passwordEncoder = passwordEncoder;
+        this.postRepository = postRepository;
     }
 
     @Transactional
-    public UserWithPostsResponseDTO getUserWithPosts(Long id) {
+    public UserWithPostsResponseDTO getUserWithPosts(Long id, Pageable pageable) {
         logger.info("Hämtar användare med id {} och dess inlägg", id);
         User user = userRepository.getUserWithPosts(id)
                 .orElseThrow(() -> {
@@ -44,11 +49,13 @@ public class UserService {
                     return new NoSuchElementException("Ingen användare finns med id: " + id);
                 });
 
-        List<PostResponseDTO> posts = user.getPosts()
-                .stream()
-                .map(postMapper::toDto)
-                .toList();
-        return new UserWithPostsResponseDTO(userMapper.toDto(user), posts);
+        Page<PostResponseDTO> posts = postRepository
+                .findByUserId(id, pageable)
+                .map(postMapper::toDto);
+        return new UserWithPostsResponseDTO(
+                userMapper.toDto(user),
+                posts
+        );
     }
 
     @Transactional
