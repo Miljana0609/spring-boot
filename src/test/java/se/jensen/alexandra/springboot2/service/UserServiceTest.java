@@ -7,12 +7,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import se.jensen.alexandra.springboot2.dto.UserRequestDTO;
-import se.jensen.alexandra.springboot2.mapper.PostMapper;
+import se.jensen.alexandra.springboot2.dto.UserResponseDTO;
 import se.jensen.alexandra.springboot2.mapper.UserMapper;
 import se.jensen.alexandra.springboot2.model.User;
-import se.jensen.alexandra.springboot2.repository.PostRepository;
 import se.jensen.alexandra.springboot2.repository.UserRepository;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -24,15 +26,12 @@ class UserServiceTest {
     @Mock
     private UserMapper userMapper;
     @Mock
-    private PostMapper postMapper;
-    @Mock
     private PasswordEncoder passwordEncoder;
-    @Mock
-    private PostRepository postRepository;
 
     @InjectMocks
     private UserService userService;
 
+    //Test skapad av AI
     @Test
     void addUser_ShouldThrowException_WhenUserAlreadyExists() {
         // Arrange
@@ -52,5 +51,22 @@ class UserServiceTest {
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> userService.addUser(request));
         verify(userRepository, never()).save(any()); // Verifiera att save ALDRIG anropas
+    }
+
+    //Test skapad efter instruktioner från Håkan - code along
+    //Testar att vår kod i findUserById fungerar som den ska
+    @Test
+    void testFindUserById() {
+        //Arrange
+        User user = new User();
+        user.setUsername("Alexandra");
+        user.setId(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        //Act
+        UserResponseDTO foundUser = userService.findUserById(1L);
+
+        //Assert
+        assertEquals("Alexandra", foundUser.username());
     }
 }
