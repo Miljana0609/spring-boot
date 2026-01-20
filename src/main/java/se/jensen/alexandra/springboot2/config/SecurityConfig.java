@@ -1,4 +1,4 @@
-package se.jensen.alexandra.springboot2.security;
+package se.jensen.alexandra.springboot2.config;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -148,7 +148,8 @@ public class SecurityConfig {
                 "http://localhost:5173",
                 "http://localhost:5174",
                 "http://localhost:5175",
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "https://inquisitive-emmye-miljanaa-0c55bd32.koyeb.app"
                 //TODO: öppna upp för frontend på koyeb
                 //ungefär: "https://your-frontend-domain.com"
         ));
@@ -158,7 +159,7 @@ public class SecurityConfig {
         ));
 
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
