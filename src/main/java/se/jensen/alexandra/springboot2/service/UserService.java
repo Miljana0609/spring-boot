@@ -62,6 +62,14 @@ public class UserService {
     public List<UserResponseDTO> getAllUsers() {
         logger.info("Hämtar alla användare");
         List<User> users = userRepository.findAll();
+
+        if (users.isEmpty()) {
+            logger.warn("Inga användare hittades i databasen");
+            throw new NoSuchElementException("Inga användare hittades i databasen");
+        } else if (users.size() == 1) {
+            logger.info("Endast en användare hittades i databasen");
+        }
+
         return users.stream()
                 .map(userMapper::toDto).toList();
     }
