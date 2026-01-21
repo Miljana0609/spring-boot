@@ -13,6 +13,11 @@ import se.jensen.alexandra.springboot2.dto.LoginResponseDTO;
 import se.jensen.alexandra.springboot2.security.MyUserDetails;
 import se.jensen.alexandra.springboot2.service.TokenService;
 
+/**
+ * En REST-controller som hanterar autentisering (inloggning) i applikationen och skapar
+ * JWT-token som frontend kan använda för att göra säkra anrop.
+ * Alla anrop till denna controller börjar med /request-token.
+ */
 @RestController
 @RequestMapping("/request-token")
 public class AuthController {
@@ -25,6 +30,14 @@ public class AuthController {
         this.tokenService = tokenService;
     }
 
+    /**
+     * Tar emot användarnamn och lösenord från frontend och kontrollerar att uppgifterna stämmer.
+     * Hämtar användarens ID från MyUserDetails.
+     * Skapar ett JWT-token med TokenService
+     *
+     * @param loginRequestDTO - innehåller användarnamn och lösenord
+     * @return - LoginResponseDTO - returnerar token och användarens ID
+     */
     @PostMapping
     public ResponseEntity<LoginResponseDTO> token(
             @RequestBody LoginRequestDTO loginRequestDTO) {

@@ -12,6 +12,13 @@ import se.jensen.alexandra.springboot2.dto.PostRequestDTO;
 import se.jensen.alexandra.springboot2.dto.PostResponseDTO;
 import se.jensen.alexandra.springboot2.service.PostService;
 
+/**
+ * En REST-controller som hanterar inlägg (posts) i applikationen.
+ * Den använder PostService för att göra alla operationer mot databasen.
+ *
+ * @RestController gör att klassen kan ta emot HTTP-anrop och skicka JSON-svar.
+ * @RequestMapping("/posts") gör att alla endpoints i den här controllern börjar med /posts
+ */
 @RestController
 @RequestMapping("/posts")
 public class PostController {
@@ -21,6 +28,13 @@ public class PostController {
         this.postService = postService;
     }
 
+    /**
+     * Hämtar en sida med inlägg, max 5 i taget.
+     * Sorterar inlägg efter createdAt i fallande ordning (nyast först)
+     *
+     * @param pageable - sidinställningar för paginering
+     * @return Page<PostResponseDTO> - som innehåller inläggens data.
+     */
     //Finns redan i UserController/UserService
     @GetMapping
     public Page<PostResponseDTO> getPosts(
@@ -36,22 +50,41 @@ public class PostController {
         return postService.getAllPosts(pageable);
     }
 
+    /**
+     * Hämtar en specifik inlägg med det angivna ID:t.
+     *
+     * @param id - Inläggets specifika ID
+     * @return PostResponseDTO - med status 200 OK.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<PostResponseDTO> getPostById
-            (@PathVariable Long id) {
+    (@PathVariable Long id) {
         return ResponseEntity.ok(postService.findPostById(id));
     }
 
+    /**
+     * Uppdaterar det existerande inlägget med angivna ID:t.
+     *
+     * @param id  - inläggets ID
+     * @param dto - Ny data som ska uppdateras
+     * @return PostResponseDTO - den uppdaterade inlägget med status 200 OK.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<PostResponseDTO> updatePost
-            (@PathVariable Long id,
-             @Valid @RequestBody PostRequestDTO dto) {
+    (@PathVariable Long id,
+     @Valid @RequestBody PostRequestDTO dto) {
         return ResponseEntity.ok(postService.updatePost(dto, id));
     }
 
+    /**
+     * Tar bort ett inlägg med det angivna ID:t från databasen.
+     *
+     * @param id - inläggets ID
+     * @return - 204 No Content (inget innehåll)
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost
-            (@PathVariable Long id) {
+    (@PathVariable Long id) {
         postService.deletePostById(id);
         return ResponseEntity.noContent().build();
     }

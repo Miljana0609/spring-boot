@@ -27,7 +27,7 @@ public class PostMapper {
 
     /**
      * Används när man skapar ett nytt inlägg.
-     * Skapar nytt Post-objekt från PostrequestDTO.
+     * Skapar nytt Post-objekt från PostRequestDTO.
      *
      * @param postDto - Information om ett inlägg.
      * @return Post - det nya inlägget.
