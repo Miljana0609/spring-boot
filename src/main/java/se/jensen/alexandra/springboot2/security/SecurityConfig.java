@@ -38,9 +38,22 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * SecurityConfig är en konfigurationsklass som hanterar säkerheten i applikationen.
+ * Den kontrollerar vem som får åtkomst till olika endpoints, hur användare autentiseras med JWT-token,
+ * hur lösenord sparas säkert och vilka frontend-sidor som får prata med backend.
+ */
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+    /**
+     * Metod som bestämmer vilka sidor som är öppna för alla och vilka som kräver roller (t.ex. ADMIN).
+     * Ställer också in JWT-autentisering, CORS och sessioner.
+     *
+     * @param http - Objekt som används för att konfigurera säkerheten
+     * @return SecurityFilterChain - Färdig säkerhetskonfiguration
+     * @throws Exception
+     */
     @Bean   //SecurityFilterChain är en inbyggd metod som finns i Spring security
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));     //Cross-Origin Resource Sharing
@@ -70,11 +83,24 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Metod som gör så att användarnas lösenord lagras säkert med hashning (BCrypt).
+     *
+     * @return BCryptPasswordEncoder för att hash:a användarlösenord.
+     */
     @Bean       //Inbyggd metod som hashar lösenord med BCrypt
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Metod som skapar RSA-nyckelpar från Base64, som används för att skapa och kontrollera JWT-tokens.
+     *
+     * @param privateKey - Privat nyckel i Base64-format
+     * @param publicKey  - Publik nyckel i Base64-format
+     * @return new KeyPair - Ett nyckelpar med privat och publik nyckel
+     * @throws Exception - Om nycklarna inte kan skapas
+     */
     @Bean
     public KeyPair keyPair(
             @Value("${jwt.private-key}") String privateKey,
@@ -97,6 +123,12 @@ public class SecurityConfig {
         return new KeyPair(pubKey, privKey);
     }
 
+    /**
+     * Metod som skapar en källa av nycklar (JWK) som används för att signera JWT-tokens.
+     *
+     * @param keyPair - Nyckelpar som innehåller privat och public nyckel
+     * @return JWKSource - Källa som innehåller nycklar för JWT-signering
+     */
     @Bean
     public JWKSource<SecurityContext> jwkSource(KeyPair keyPair) {
         RSAKey rsaKey = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
@@ -107,11 +139,23 @@ public class SecurityConfig {
         return (jwkSelector, context) -> jwkSelector.select(jwkSet);
     }
 
+    /**
+     * Metod som skapar JWT-tokens som skickas till användare vid inloggning.
+     *
+     * @param jwkSource - Källa som innehåller nycklar för signering
+     * @return NimbusJwtEncoder - Encoder som skapar JWT-tokens
+     */
     @Bean
     public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
         return new NimbusJwtEncoder(jwkSource);
     }
 
+    /**
+     * Metod som kontrollerar att JWT-tokens som skickas tillbaka är giltiga.
+     *
+     * @param keyPair - Nyckelpar som innehåller privat och public nyckel
+     * @return NimbusJwtDecoder - Decoder som verifierar JWT-tokens
+     */
     @Bean
     public JwtDecoder jwtDecoder(KeyPair keyPair) {
         return NimbusJwtDecoder
@@ -119,6 +163,11 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Metod som gör om informationen i JWT-token till roller och rättigheter som Spring Security kan förstå.
+     *
+     * @return JwtAuthenticationConverter - Converter för JWT-autentisering
+     */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter converter =
@@ -134,12 +183,26 @@ public class SecurityConfig {
         return authenticationConverter;
     }
 
+    /**
+     * Metod som returnerar ett autentiseringsobjekt som används för att
+     * autentisera användare vid inloggning
+     *
+     * @param configuration - Spring Securitys autentiseringskonfiguration
+     * @return AuthenticationManager - Objekt som hanterar autentisering
+     * @throws Exception - Om AuthenticationManager inte kan skapas
+     */
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+    /**
+     * Metod som konfigurerar CORS-inställningar, alltså vilka domäner,
+     * HTTP-metoder och headers som frontend får använda.
+     *
+     * @return CorsConfigurationSource - Konfiguration för CORS
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
