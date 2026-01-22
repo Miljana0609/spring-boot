@@ -2,6 +2,7 @@ package se.jensen.alexandra.springboot2.controller;
 
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -141,16 +142,15 @@ public class UserController {
     @GetMapping("/{id}/with-posts")
     public UserWithPostsResponseDTO getUserWithPosts(
             @PathVariable Long id,
-            @ParameterObject
-            @PageableDefault(
-                    //page = 0, 0 är default och behöver inte anges
+            @ParameterObject @PageableDefault(
                     size = 5,
                     sort = "createdAt",
-                    direction = Sort.Direction.DESC
-            )
+                    direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
-        return userService.getUserWithPosts(id, pageable);
+        int size = pageable.getPageSize() <= 0 ? 5 : Math.min(pageable.getPageSize(), 5);
+        Pageable fixed = PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
+        return userService.getUserWithPosts(id, fixed);
     }
 
 }

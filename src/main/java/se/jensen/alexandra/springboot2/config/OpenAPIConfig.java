@@ -1,4 +1,4 @@
-package se.jensen.alexandra.springboot2.security;
+package se.jensen.alexandra.springboot2.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;

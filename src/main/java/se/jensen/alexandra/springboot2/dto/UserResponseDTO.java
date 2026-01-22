@@ -20,4 +20,6 @@ public record UserResponseDTO(
         String bio,
         String profileImagePath
 ) {
+
+
 }
