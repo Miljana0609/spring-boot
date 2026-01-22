@@ -7,10 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import se.jensen.alexandra.springboot2.dto.PostResponseDTO;
-import se.jensen.alexandra.springboot2.dto.UserRequestDTO;
-import se.jensen.alexandra.springboot2.dto.UserResponseDTO;
-import se.jensen.alexandra.springboot2.dto.UserWithPostsResponseDTO;
+import se.jensen.alexandra.springboot2.dto.*;
 import se.jensen.alexandra.springboot2.mapper.PostMapper;
 import se.jensen.alexandra.springboot2.mapper.UserMapper;
 import se.jensen.alexandra.springboot2.model.User;
@@ -201,6 +198,30 @@ public class UserService {
         logger.info("Hämtar användare via användarnamn: {}", username);
         Optional<User> user = userRepository.findByUsername(username);
         return user;
+    }
+
+    @Transactional
+    public UserResponseDTO registerUser(RegisterUserRequestDTO dto) {
+        logger.info("Registrerar en ny användare: {}", dto.username());
+
+        boolean userExists = userRepository.existsByUsernameOrEmail(dto.username(), dto.email());
+
+        if (userExists) {
+            throw new IllegalArgumentException("Användarnamn eller e-post finns redan");
+        }
+        User user = new User();
+        user.setUsername(dto.username());
+        user.setPassword(passwordEncoder.encode(dto.password()));
+        user.setEmail(dto.email());
+
+        //Defaultvärden
+        user.setRole("USER");
+        user.setBio("");
+        user.setDisplayName(dto.username());
+        user.setProfileImagePath("");
+
+        User savedUser = userRepository.save(user);
+        return userMapper.toDto(savedUser);
     }
 }
 

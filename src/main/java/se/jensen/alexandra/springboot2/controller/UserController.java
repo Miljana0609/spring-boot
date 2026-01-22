@@ -153,4 +153,15 @@ public class UserController {
         return userService.getUserWithPosts(id, fixed);
     }
 
+    /**
+     * Registrerar en ny användare
+     *
+     * @param dto - data som behövs
+     * @return UserResponseDTO - information om den registrerade användaren
+     */
+    @PostMapping("/register")
+    public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody RegisterUserRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(dto));
+    }
+
 }

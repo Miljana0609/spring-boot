@@ -69,13 +69,13 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/request-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
                 .requestMatchers(//Raden ovan och de tre nedan öppnar upp för att vem som helst ska kunna
                         "/swagger-ui/**",   //gå in och skapa en ny user, detta för att vi i övrigt låst applikationen
                         "/v3/api-docs/**",  //Vi kan därmed skapa ett konto som har Admin för att sedan låsa framöver
                         "/swagger-ui.html"
                 ).permitAll() //Hoppas det uppdateras nu
                 .requestMatchers("/public/**").permitAll()
-
                 .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
