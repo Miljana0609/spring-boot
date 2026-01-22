@@ -35,8 +35,10 @@ public class PostService {
         return postRepository.findAll(pageable)
                 .map(post -> new PostResponseDTO(
                         post.getId(),
+                        post.getUser().getUsername(),
                         post.getText(),
-                        post.getCreatedAt()
+                        post.getCreatedAt(),
+                        post.getUser().getId()
                 ));
     }
 
@@ -64,7 +66,7 @@ public class PostService {
         post.setUser(user);
         Post savedPost = postRepository.save(post);
         logger.info("Inlägg skapat med id: {}", savedPost.getId());
-        return new PostResponseDTO(savedPost.getId(), savedPost.getText(), savedPost.getCreatedAt());
+        return new PostResponseDTO(savedPost.getId(), savedPost.getUser().getUsername(), savedPost.getText(), savedPost.getCreatedAt(), savedPost.getUser().getId());
     }
 
     public PostResponseDTO updatePost(PostRequestDTO userDto, Long id) {
