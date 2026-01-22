@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
+/**
+ * User-klassen är en entitetsklass som representerar en användare i systemet och motsvarar tabellen app_user.
+ * Klassen innehåller information om användarens profil, samt en relation till inlägg där en användare kan ha flera inlägg.
+ * Konstruktörer, getters och setters finns för att hantera användarens data.
+ */
 @Entity
 @Table(name = "app_user")
 public class User {

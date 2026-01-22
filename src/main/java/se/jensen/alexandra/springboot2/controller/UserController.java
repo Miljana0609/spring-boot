@@ -18,6 +18,11 @@ import se.jensen.alexandra.springboot2.service.UserService;
 
 import java.util.List;
 
+/**
+ * EN REST-controller som hanterar användare och deras inlägg i applikationen.
+ * Använder UserService för allt som har med användare att göra och PostService för inlägg.
+ * Varje metod svarar på olika HTTP anrop och skickar data till/från frontend.
+ */
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -29,6 +34,11 @@ public class UserController {
         this.postService = postService;
     }
 
+    /**
+     * Hämtar lista med alla användare. Kräver ADMIN-roll
+     *
+     * @return - EN lista med alla användare
+     */
     //Hämta lista på alla användare
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
@@ -36,14 +46,26 @@ public class UserController {
         return ResponseEntity.ok().body(userService.getAllUsers());
     }
 
+    /**
+     * Hämtar information om den inloggade användaren. Kräver USER-roll.
+     *
+     * @param userDetails - Detaljer om den inloggade användare
+     * @return - Information om den inloggade användare
+     */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> getMe
-            (@AuthenticationPrincipal MyUserDetails userDetails) {
+    (@AuthenticationPrincipal MyUserDetails userDetails) {
         return ResponseEntity.ok(userService.getCurrentUser(userDetails));
     }
 
 
+    /**
+     * Hämtar information om en specifik användare med ID. Kräver ADMIN-roll.
+     *
+     * @param id - användarens ID
+     * @return - Returnerar den användare med angivna ID:t
+     */
     //Hämta en enskild användare
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
@@ -52,6 +74,12 @@ public class UserController {
         return ResponseEntity.ok().body(userService.findUserById(id));
     }
 
+    /**
+     * Skapar en ny användare med information från frontend.
+     *
+     * @param dto -Data för den nya användaren.
+     * @return - Returnerar den skapade användaren.
+     */
     //Lägg till en användare
     @PostMapping
     public ResponseEntity<UserResponseDTO> addUser
@@ -59,6 +87,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.addUser(dto));
     }
 
+    /**
+     * Uppdaterar en befintlig användare med nytt data
+     *
+     * @param id  - användarens ID
+     * @param dto - Ny information om användaren
+     * @return - Returnerar uppdaterade info om användaren.
+     */
     //Uppdatera en användare
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser
@@ -67,6 +102,12 @@ public class UserController {
         return ResponseEntity.ok().body(userService.updateUser(dto, id));
     }
 
+    /**
+     * Tar bort en användare från databasen.
+     *
+     * @param id - Användarens ID.
+     * @return - Inget innehåll (HTTP 204)
+     */
     //Radera en användare
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser
@@ -75,6 +116,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    /**
+     * Skapar ett nytt inlägg för en specifik användare.
+     *
+     * @param userId  - Användarens ID
+     * @param request - Data för det nya inlägget
+     * @return - Det skapade inlägget
+     */
     //Skapa ett inlägg för en användare
     @PostMapping("/{userId}/posts")
     public ResponseEntity<PostResponseDTO> createPostForUser(
@@ -83,6 +131,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(postService.createPost(userId, request));
     }
 
+    /**
+     * Hämtar en användare och alla deras inlägg med paginering.
+     *
+     * @param id       - Användarens ID
+     * @param pageable - Paginering och sortering av inlägg
+     * @return UserWithPostsResponseDTO - som innehåller både användarinfo och en sida med inlägg.
+     */
     //Hämta alla inlägg från samt info om användare
     @GetMapping("/{id}/with-posts")
     public UserWithPostsResponseDTO getUserWithPosts(

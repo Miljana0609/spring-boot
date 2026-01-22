@@ -5,6 +5,10 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Post-klassen är en entitetsklass som representerar inlägg i systemet och motsvarar tabellen posts i databasen.
+ * Klassen innehåller information om inläggets innehåll, datum, samt koppling till den användare som skapat inlägget.
+ */
 @Entity
 @Table(name = "posts")
 public class Post {

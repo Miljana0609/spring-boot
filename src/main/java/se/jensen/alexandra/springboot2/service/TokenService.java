@@ -13,6 +13,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.stream.Collectors;
 
+/**
+ * En serviceklass som ansvarar för att skapa säkerhetstoken (JWT).
+ * Den används när en användare har loggat in för att generera en token som bevisar vem användaren är och vilka rättigheter den har i systemet.
+ */
 @Service
 public class TokenService {
     private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
@@ -23,6 +27,14 @@ public class TokenService {
         this.jwtEncoder = jwtEncoder;
     }
 
+    /**
+     * Metod som skapar en JWT-token för en inloggad användare. Den tar emot information om användaren och dess roller,
+     * sätter hur länge den ska vara giltig (1 timme) och returnerar den färdiga token som en sträng.
+     * Tokenen används sen för att ge användaren åtkomst till skyddade resurser.
+     *
+     * @param authentication - Information om den autentiserade användaren
+     * @return token - String som ger åtkomst
+     */
     public String generateToken(Authentication authentication) {
         logger.info("Genererar token för användare: {}", authentication.getName());
         Instant now = Instant.now();
