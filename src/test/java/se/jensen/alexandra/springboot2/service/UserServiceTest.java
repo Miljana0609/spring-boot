@@ -23,6 +23,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testklass för att testa funktionaliteten hos UserService.
+ * Klassen använder mockade beroenden för att simulera interaktioner med UserRepository, UserMapper och PasswordEncoder.
+ */
+
 @ExtendWith(MockitoExtension.class)
 @Disabled
 class UserServiceTest {

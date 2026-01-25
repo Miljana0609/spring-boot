@@ -1,5 +1,9 @@
 package se.jensen.alexandra.springboot2.dto;
 
+/**
+ * Denna klass används för att bygga ett UserResponseDTO objekt genom en serie kedjade metoder
+ * som gör det möjligt att sätta värden för olika attribut (id, användarnamn, e-postadress, etc.).
+ */
 public final class UserResponseDTOBuilder {
     private Long id;
     private String username;
