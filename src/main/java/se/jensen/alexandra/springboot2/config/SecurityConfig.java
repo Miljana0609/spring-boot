@@ -56,6 +56,7 @@ public class SecurityConfig {
      */
     @Bean   //SecurityFilterChain är en inbyggd metod som finns i Spring security
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));     //Cross-Origin Resource Sharing
         http.csrf(AbstractHttpConfigurer::disable);     //Ett säkerhetstoken som vi nu har valt att stänga av
 

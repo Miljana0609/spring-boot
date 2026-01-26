@@ -9,14 +9,16 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import se.jensen.alexandra.springboot2.dto.*;
-import se.jensen.alexandra.springboot2.security.MyUserDetails;
+import se.jensen.alexandra.springboot2.model.User;
+import se.jensen.alexandra.springboot2.repository.UserRepository;
 import se.jensen.alexandra.springboot2.service.PostService;
 import se.jensen.alexandra.springboot2.service.UserService;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * EN REST-controller som hanterar användare och deras inlägg i applikationen.
@@ -28,10 +30,12 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
     private final PostService postService;
+    private final UserRepository userRepository;
 
-    public UserController(UserService userService, PostService postService) {
+    public UserController(UserService userService, PostService postService, UserRepository userRepository) {
         this.userService = userService;
         this.postService = postService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -49,14 +53,16 @@ public class UserController {
     /**
      * Hämtar information om den inloggade användaren. Kräver USER-roll.
      *
-     * @param userDetails - Detaljer om den inloggade användare
+     * @param authentication - Detaljer om den inloggade användare
      * @return - Information om den inloggade användare
      */
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> getMe
-    (@AuthenticationPrincipal MyUserDetails userDetails) {
-        return ResponseEntity.ok(userService.getCurrentUser(userDetails));
+    (Authentication authentication) {
+        String username = authentication.getName();
+        UserResponseDTO dto = userService.getCurrentUserByUsername(username);
+        return ResponseEntity.ok(dto);
     }
 
 
@@ -163,5 +169,29 @@ public class UserController {
     public ResponseEntity<UserResponseDTO> register(@Valid @RequestBody RegisterUserRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(dto));
     }
+
+
+    /**
+     * Uppdaterar den inloggade användarens profilinformation.
+     * Endast den autentiserade användaren kan uppdatera sin egen profil.
+     *
+     * @param authentication - inloggad användarens säkerhetsinformation
+     * @param dto            - objekt som innehåller uppdaterad profilinformation
+     * @return UserResponseDTO - uppdaterad användarprofil
+     */
+//    @PreAuthorize("hasRole('USER')")
+    @PutMapping("/me")
+    public ResponseEntity<UserResponseDTO> updateMe(
+            Authentication authentication,
+            @Valid @RequestBody UpdateProfileDTO dto) {
+
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("Användare hittades ej med användanamn:" + username));
+
+        UserResponseDTO updatedUser = userService.updateProfile(user.getId(), dto);
+        return ResponseEntity.ok(updatedUser);
+    }
+
 
 }

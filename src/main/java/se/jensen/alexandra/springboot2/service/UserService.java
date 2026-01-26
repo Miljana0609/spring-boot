@@ -223,6 +223,26 @@ public class UserService {
         User savedUser = userRepository.save(user);
         return userMapper.toDto(savedUser);
     }
+
+    @Transactional
+    public UserResponseDTO updateProfile(Long userId, UpdateProfileDTO dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("Ingen användare med id: " + userId));
+
+        if (dto.displayName() != null) user.setDisplayName(dto.displayName());
+        if (dto.bio() != null) user.setBio(dto.bio());
+        if (dto.profileImagePath() != null) user.setProfileImagePath(dto.profileImagePath());
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.toDto(updatedUser);
+    }
+
+
+    public UserResponseDTO getCurrentUserByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("Användare hittades inte:" + username));
+        return userMapper.toDto(user);
+    }
 }
 
 
