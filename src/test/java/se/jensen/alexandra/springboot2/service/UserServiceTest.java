@@ -84,7 +84,14 @@ class UserServiceTest {
         User user = new User();
         user.setUsername("Alexandra");
         user.setId(1L);
+
+        UserResponseDTO dto = UserResponseDTOBuilder.builder()
+                .id(1L)
+                .username("Alexandra")
+                .build();
+        
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userMapper.toDto(user)).thenReturn(dto);
 
         //Act
         UserResponseDTO foundUser = userService.findUserById(1L);
