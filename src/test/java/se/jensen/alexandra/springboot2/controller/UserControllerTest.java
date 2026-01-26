@@ -26,13 +26,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Testklass som ansvarar för att testa UserController.
+ * Innehåller tester för CRUD-operationer (skapa, hämta, uppdatera och radera användare).
+ * Testerna använder MockMvc för att simulera HTTP-anrop och verifiera svaren från servern.
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Disabled
 public class UserControllerTest {
 
-    @Autowired      //Används då man inte har en konstruktor i test.
+    @Autowired      // Används då man inte har en konstruktor i test.
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
@@ -41,6 +46,10 @@ public class UserControllerTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Setup-metod som körs före varje testfall för att förbereda testmiljön.
+     * Rensar databasen och skapar en admin-användare för att användas i testerna.
+     */
     @BeforeEach
     public void setUp() {
         userRepository.deleteAll();
@@ -56,12 +65,19 @@ public class UserControllerTest {
         userRepository.save(user);
     }
 
+    /**
+     * Testar att alla användare kan hämtas via GET /users.
+     * Verifierar att svaret innehåller en lista med användare och att statusen är OK.
+     *
+     * @throws Exception om något går fel vid HTTP-anropet.
+     */
     @Test
     void shouldGetAllUsers() throws Exception {
         //1. Arrange
         MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/users")
                         .with(httpBasic("admin", "password")))
                 .andExpect(status().isOk()).andReturn();
+
         //2. Konvertera
         String response = result.getResponse().getContentAsString();
 
@@ -74,6 +90,12 @@ public class UserControllerTest {
         assertEquals(1, users.size());
     }
 
+    /**
+     * Testar att en användare kan hämtas via GET /users/{id}.
+     * Skapar först en användare och verifierar att den kan hämtas korrekt.
+     *
+     * @throws Exception om något går fel vid HTTP-anropet.
+     */
     @Test
     void shouldFindUserById() throws Exception {
         shouldCreateUser();
@@ -92,6 +114,12 @@ public class UserControllerTest {
         assertEquals("testuser@example.com", savedUser.email());
     }
 
+    /**
+     * Testar att en ny användare kan skapas via POST /users.
+     * Verifierar att användaren skapades korrekt i databasen och att lösenordet är krypterat.
+     *
+     * @throws Exception om något går fel vid HTTP-anropet.
+     */
     @Test
     void shouldCreateUser() throws Exception {
         //1. Arrange
@@ -124,6 +152,4 @@ public class UserControllerTest {
 
         assertTrue(passwordEncoder.matches("password", savedUser.getPassword()));
     }
-
-
 }
