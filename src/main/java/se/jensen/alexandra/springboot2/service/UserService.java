@@ -200,6 +200,15 @@ public class UserService {
         return user;
     }
 
+    /**
+     * Metod som registrerar en ny användare.
+     * Metoden kollar först om användarnamn eller e-post redan finns i databasen.
+     * Om inte, skapas en ny användare med defaultvärden för roll, bio, displayName och profilbild.
+     * Lösenordet krypteras innan användaren sparas i databasen.
+     *
+     * @param dto - information om den nya användaren
+     * @return UserResponseDTO - DTO med den skapade användarinfo
+     */
     @Transactional
     public UserResponseDTO registerUser(RegisterUserRequestDTO dto) {
         logger.info("Registrerar en ny användare: {}", dto.username());
@@ -224,6 +233,14 @@ public class UserService {
         return userMapper.toDto(savedUser);
     }
 
+    /**
+     * Metod som uppdaterar profilinformation för en användare.
+     * Endast de fält som skickas med i DTO uppdateras. Om ett fält är null, lämnas det oförändrat.
+     *
+     * @param userId - Användarens ID
+     * @param dto    - Ny profilinformation
+     * @return UserResponseDTO med den uppdaterade användarinfo
+     */
     @Transactional
     public UserResponseDTO updateProfile(Long userId, UpdateProfileDTO dto) {
         logger.info("Uppdaterar profil för användare med id: {}", userId);
@@ -238,7 +255,12 @@ public class UserService {
         return userMapper.toDto(updatedUser);
     }
 
-
+    /**
+     * Metod som hämtar den inloggade användaren via användarnamn
+     *
+     * @param username - Användarens användarnamn
+     * @return UserResponseDTO med information om användaren
+     */
     public UserResponseDTO getCurrentUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("Användare hittades inte:" + username));

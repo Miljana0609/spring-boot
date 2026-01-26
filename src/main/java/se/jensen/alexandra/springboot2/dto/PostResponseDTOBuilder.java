@@ -2,6 +2,12 @@ package se.jensen.alexandra.springboot2.dto;
 
 import java.time.LocalDateTime;
 
+/**
+ * En builder-klass som används för att skapa instanser av PostResponseDTO.
+ * Buildern använder kedjade metoder som gör det möjligt att sätta värden
+ * för olika attribut (id, användarnamn, datum, etc.). Sedan skapas DTO-objektet
+ * med hjälp av build()-metoden.
+ */
 public final class PostResponseDTOBuilder {
     private Long id;
     private String username;

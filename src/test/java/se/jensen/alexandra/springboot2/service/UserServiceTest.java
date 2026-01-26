@@ -33,7 +33,6 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
     @InjectMocks
     private UserService userService;
-
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -42,6 +41,13 @@ class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     //Test skapad av AI
+
+    /**
+     * Test som verifierar att ett exception kastas när man försöker lägga till en användare som redan finns.
+     * Testet mockar nödvändiga beroenden och kontrollerar att rätt metoder anropas eller inte anropas vid felaktiga förutsättningar.
+     *
+     * @throws IllegalArgumentException när användaren redan finns i databasen.
+     */
     @Test
     void addUser_ShouldThrowException_WhenUserAlreadyExists() {
         // Arrange
@@ -65,13 +71,27 @@ class UserServiceTest {
 
     //Test skapad efter instruktioner från Håkan - code along
     //Testar att vår kod i findUserById fungerar som den ska
+
+    /**
+     * Test som verifierar att findUserById-metoden returnerar rätt användardata när en användare med angivet ID finns.
+     * Testet mockar nödvändiga beroenden och kontrollerar att den returnerade datan är korrekt.
+     *
+     * @throws NoSuchElementException när ingen användare med angivet ID finns.
+     */
     @Test
     void testFindUserById() {
         //Arrange
         User user = new User();
         user.setUsername("Alexandra");
         user.setId(1L);
+
+        UserResponseDTO dto = UserResponseDTOBuilder.builder()
+                .id(1L)
+                .username("Alexandra")
+                .build();
+        
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userMapper.toDto(user)).thenReturn(dto);
 
         //Act
         UserResponseDTO foundUser = userService.findUserById(1L);
@@ -82,6 +102,13 @@ class UserServiceTest {
 
     //Test skapad efter instruktioner från Håkan - code along
     //Testar att vår kod i getAllUsers fungerar som den ska
+
+    /**
+     * Test som verifierar att getAllUsers-metoden returnerar en lista med alla användare.
+     * Testet mockar nödvändiga beroenden och kontrollerar att den returnerade listan är korrekt.
+     *
+     * @throws NoSuchElementException när inga användare finns i databasen.
+     */
     @Test
     void testGetAllUsers() {
         //Arrange
@@ -115,10 +142,16 @@ class UserServiceTest {
 
         //Assert
         assertEquals(2, users.size());
-        assertEquals("Alexandra", users.get(0).getUsername());
-        assertEquals("Håkan", users.get(1).getUsername());
+        assertEquals("Alexandra", result.get(0).username());
+        assertEquals("Håkan", result.get(1).username());
     }
 
+    /**
+     * Test som verifierar att getAllUsers-metoden kastar ett NoSuchElementException när inga användare finns i databasen.
+     * Testet mockar nödvändiga beroenden och kontrollerar att rätt exception kastas vid tom databas.
+     *
+     * @throws NoSuchElementException när inga användare finns i databasen.
+     */
     @Test
     void testGetAllUsers_NoUsersFound() {
         // Arrange
