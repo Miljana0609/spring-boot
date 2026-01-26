@@ -226,6 +226,7 @@ public class UserService {
 
     @Transactional
     public UserResponseDTO updateProfile(Long userId, UpdateProfileDTO dto) {
+        logger.info("Uppdaterar profil för användare med id: {}", userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("Ingen användare med id: " + userId));
 

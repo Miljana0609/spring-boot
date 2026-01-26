@@ -181,15 +181,15 @@ public class UserController {
      */
 //    @PreAuthorize("hasRole('USER')")
     @PutMapping("/me")
-    public ResponseEntity<UserResponseDTO> updateMe(
-            Authentication authentication,
-            @Valid @RequestBody UpdateProfileDTO dto) {
+    public ResponseEntity<UserResponseDTO> updateProfile(
+            @RequestBody UpdateProfileDTO dto,
+            Authentication authentication) {
 
         String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
+        User authUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("Användare hittades ej med användanamn:" + username));
 
-        UserResponseDTO updatedUser = userService.updateProfile(user.getId(), dto);
+        UserResponseDTO updatedUser = userService.updateProfile(authUser.getId(), dto);
         return ResponseEntity.ok(updatedUser);
     }
 
