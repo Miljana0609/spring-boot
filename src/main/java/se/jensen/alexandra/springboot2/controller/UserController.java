@@ -2,15 +2,19 @@ package se.jensen.alexandra.springboot2.controller;
 
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import se.jensen.alexandra.springboot2.dto.*;
 import se.jensen.alexandra.springboot2.model.User;
 import se.jensen.alexandra.springboot2.repository.UserRepository;
@@ -19,6 +23,7 @@ import se.jensen.alexandra.springboot2.service.UserService;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * EN REST-controller som hanterar användare och deras inlägg i applikationen.
@@ -56,7 +61,7 @@ public class UserController {
      * @param authentication - Detaljer om den inloggade användare
      * @return - Information om den inloggade användare
      */
-    @PreAuthorize("hasRole('USER')")
+    //@PreAuthorize("hasRole('USER')")
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> getMe
     (Authentication authentication) {
@@ -179,7 +184,7 @@ public class UserController {
      * @param dto            - objekt som innehåller uppdaterad profilinformation
      * @return UserResponseDTO - uppdaterad användarprofil
      */
-//    @PreAuthorize("hasRole('USER')")
+    //@PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
     @PutMapping("/me")
     public ResponseEntity<UserResponseDTO> updateProfile(
             @RequestBody UpdateProfileDTO dto,
@@ -193,5 +198,26 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    @PostMapping("/profile-image")
+    public ResponseEntity<Void> uploadProfileImage(
+            @RequestParam("image") MultipartFile file,
+            Authentication authentication
+    ) {
+        userService.saveProfileImage(file, authentication.getName());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{username}/profile-image")
+    public ResponseEntity<Resource> getProfileImage(
+            @PathVariable String username,
+            Authentication authentication
+    ) {
+        Resource resource = userService.getProfileImage(username, authentication);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS).cachePublic())
+                .body(resource);
+    }
 
 }
