@@ -105,4 +105,22 @@ public class FriendshipController {
 
         return ResponseEntity.ok(dtos);
     }
+
+    @GetMapping("/users/{id}/requests")
+    public ResponseEntity<List<FriendshipResponseDTO>> getReceivedRequests(
+            @PathVariable Long id,
+            @ParameterObject @PageableDefault(
+                    size = 5,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC)
+            Pageable pageable) {
+
+        var requests = friendshipService.getIncomingFriendRequests(id, pageable);
+
+        List<FriendshipResponseDTO> dtos = requests.stream()
+                .map(friendshipMapper::toDto)
+                .toList();
+
+        return ResponseEntity.ok(dtos);
+    }
 }

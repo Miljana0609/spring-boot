@@ -18,14 +18,8 @@ public class FriendshipMapper {
         return builder()
                 .id(friendship.getId())
                 .status(friendship.getStatus().name())
-                .requester(friendship.getRequester() != null
-                        ? userMapper.toDto(friendship.getRequester())
-                        : null)
-                .receiver(friendship.getReceiver() != null
-                        ? userMapper.toDto(friendship.getReceiver())
-                        : null)
+                .requester(userMapper.toDto(friendship.getRequester()))
+                .receiver(userMapper.toDto(friendship.getReceiver()))
                 .build();
     }
-
-
 }

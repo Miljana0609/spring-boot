@@ -25,7 +25,7 @@ public interface FriendshipRepository extends JpaRepository<Friendship, Long> {
     List<Friendship> findByReceiverIdAndStatus(Long receiverId, Friendship.Status status);
 
     List<Friendship> findByRequesterIdOrReceiverId(Long requesterId, Long receiverId);
-
+    
     @Query("""
                 SELECT f FROM Friendship f
                 WHERE (f.requester.id = :u1 AND f.receiver.id = :u2)
