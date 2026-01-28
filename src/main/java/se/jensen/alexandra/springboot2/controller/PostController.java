@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import se.jensen.alexandra.springboot2.dto.PostRequestDTO;
 import se.jensen.alexandra.springboot2.dto.PostResponseDTO;
@@ -43,11 +44,12 @@ public class PostController {
                     size = 5,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC)
-            Pageable pageable
+            Pageable pageable,
+            Authentication authentication
     ) {
         int size = pageable.getPageSize() <= 0 ? 5 : Math.min(pageable.getPageSize(), 5);
         Pageable fixed = PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
-        return postService.getAllPosts(fixed);
+        return postService.getAllPosts(fixed, authentication);
     }
 
     /**
@@ -87,5 +89,11 @@ public class PostController {
     (@PathVariable Long id) {
         postService.deletePostById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> likePost(@PathVariable Long id, Authentication authentication) {
+        postService.toggleLike(id, authentication.getName());
+        return ResponseEntity.ok().build();
     }
 }

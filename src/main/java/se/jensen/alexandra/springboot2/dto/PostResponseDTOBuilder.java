@@ -14,6 +14,8 @@ public final class PostResponseDTOBuilder {
     private String text;
     private LocalDateTime createdAt;
     private Long userId;
+    private int likeCount;
+    private boolean likedByMe;
 
     private PostResponseDTOBuilder() {
     }
@@ -47,8 +49,18 @@ public final class PostResponseDTOBuilder {
         return this;
     }
 
+    public PostResponseDTOBuilder likeCount(int likeCount) {
+        this.likeCount = likeCount;
+        return this;
+    }
+
+    public PostResponseDTOBuilder likedByMe(boolean likedByMe) {
+        this.likedByMe = likedByMe;
+        return this;
+    }
+
     public PostResponseDTO build() {
-        return new PostResponseDTO(id, username, text, createdAt, userId);
+        return new PostResponseDTO(id, username, text, createdAt, userId, likeCount, likedByMe);
     }
 
     public static PostResponseDTOBuilder from(PostResponseDTO dto) {
@@ -57,6 +69,8 @@ public final class PostResponseDTOBuilder {
                 .username(dto.username())
                 .text(dto.text())
                 .createdAt(dto.createdAt())
-                .userId(dto.userId());
+                .userId(dto.userId())
+                .likeCount(dto.likeCount())
+                .likedByMe(dto.likedByMe());
     }
 }

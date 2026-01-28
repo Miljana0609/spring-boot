@@ -47,17 +47,21 @@ public class UserService {
      * @return DTO med användarens information och inlägg
      */
     @Transactional
-    public UserWithPostsResponseDTO getUserWithPosts(Long id, Pageable pageable) {
+    public UserWithPostsResponseDTO getUserWithPosts(Long id, Pageable pageable, String currentUsername) {
         logger.info("Hämtar användare med id {} och dess inlägg", id);
         User user = userRepository.getUserWithPosts(id)
                 .orElseThrow(() -> {
                     logger.warn("Användare med id {} hittades inte", id);
                     return new NoSuchElementException("Ingen användare finns med id: " + id);
                 });
-
+        User usr = null;
+        if (currentUsername != null) {
+            usr = userRepository.findByUsername(currentUsername).orElse(null);
+        }
+        final User finalUser = usr;
         Page<PostResponseDTO> posts = postRepository
                 .findByUserId(id, pageable)
-                .map(postMapper::toDto);
+                .map(post -> postMapper.toDto(post, finalUser));
         return new UserWithPostsResponseDTO(
                 userMapper.toDto(user),
                 posts

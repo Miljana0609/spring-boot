@@ -56,7 +56,7 @@ public class SecurityConfig {
      */
     @Bean   //SecurityFilterChain är en inbyggd metod som finns i Spring security
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        
+
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));     //Cross-Origin Resource Sharing
         http.csrf(AbstractHttpConfigurer::disable);     //Ett säkerhetstoken som vi nu har valt att stänga av
 
@@ -77,6 +77,7 @@ public class SecurityConfig {
                         "/swagger-ui.html"
                 ).permitAll() //Hoppas det uppdateras nu
                 .requestMatchers("/public/**").permitAll()
+                .requestMatchers("/comments/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
