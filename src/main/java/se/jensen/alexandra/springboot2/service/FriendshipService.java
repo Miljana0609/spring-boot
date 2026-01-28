@@ -20,6 +20,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * En serviceklass som ansvarar för all affärslogik kring vänskapsrelationer.
+ * Klassen kommunicerar med databasen via repository-klasser och använder FriendshipMapper
+ * för att omvandla mellan entiteter och DTO:er.
+ */
 @Service
 public class FriendshipService {
     private static final Logger logger = LoggerFactory.getLogger(FriendshipService.class);
@@ -35,6 +40,13 @@ public class FriendshipService {
         this.friendshipMapper = friendshipMapper;
     }
 
+    /**
+     * Metod som skickar en vänförfrågan mellan två användare.
+     *
+     * @param requesterId - ID för användaren som skickar förfrågan
+     * @param receiverId  - ID för användaren som tar emot förfrågan
+     * @return FriendshipResponseDTO - den skapade vänförfrågan
+     */
     public FriendshipResponseDTO sendFriendRequest(Long requesterId, Long receiverId) {
         logger.info("Skickar vänförfrågan från användare {} till användare {}", requesterId, receiverId);
         User requester = userRepository.findById(requesterId)
@@ -43,11 +55,13 @@ public class FriendshipService {
                 .orElseThrow(() -> new IllegalArgumentException("Mottagaren finns inte."));
 
         if (requesterId.equals(receiverId)) {
+            logger.warn("Mottager {} hittades inte", receiverId);
             throw new IllegalArgumentException("Användare kan inte skicka vänförfrågan till sig själv.");
         }
 
         if (friendshipRepository.existsByRequesterIdAndReceiverId(requesterId, receiverId) ||
                 friendshipRepository.existsByReceiverIdAndRequesterId(receiverId, requesterId)) {
+            logger.warn("Vänskap finns redan mellan användare {} och {}", requesterId, receiverId);
             throw new IllegalStateException("En vänförfrågan finns redan mellan dessa användare.");
         }
 
@@ -61,6 +75,13 @@ public class FriendshipService {
         return friendshipMapper.toDto(friendship);
     }
 
+    /**
+     * Metod som accepterar en vänförfrågan.
+     *
+     * @param friendshipId - ID för vänförfrågan
+     * @param userId       - ID för användaren som accepterar
+     * @return FriendshipResponseDTO - uppdaterad relation
+     */
     @Transactional
     public FriendshipResponseDTO acceptFriendRequest(Long friendshipId, Long userId) {
         logger.info("Accepterar vänförfrågan med ID: {}", friendshipId);
@@ -68,10 +89,12 @@ public class FriendshipService {
                 .orElseThrow(() -> new IllegalArgumentException("Vänförfrågan finns inte."));
 
         if (friendship.getStatus() != Friendship.Status.PENDING) {
+            logger.warn("Vänskapsförfrågan {} är inte väntande (status={})", friendshipId, friendship.getStatus());
             throw new IllegalStateException("Endast väntande vänförfrågningar kan accepteras.");
         }
 
         if (!friendship.getReceiver().getId().equals(userId)) {
+            logger.warn("Användare {} är inte mottagare av vänskapsförfrågan {}", userId, friendshipId);
             throw new IllegalArgumentException("Endast mottagaren kan acceptera vänförfrågan.");
         }
 
@@ -83,6 +106,13 @@ public class FriendshipService {
         return friendshipMapper.toDto(friendship);
     }
 
+    /**
+     * Metod som avslår en vänförfrågan.
+     *
+     * @param friendshipId - ID för vänförfrågan
+     * @param userId       - ID för användaren som avslår
+     * @return FriendshipResponseDTO - uppdaterad relation
+     */
     @Transactional
     public FriendshipResponseDTO rejectFriendRequest(Long friendshipId, Long userId) {
         logger.info("Avslår vänförfrågan med ID: {}", friendshipId);
@@ -90,10 +120,12 @@ public class FriendshipService {
                 .orElseThrow(() -> new IllegalArgumentException("Vänförfrågan finns inte."));
 
         if (friendship.getStatus() != Friendship.Status.PENDING) {
+            logger.warn("Status på vänskapsförfrågan {} är ej väntane (status={})", friendshipId, friendship.getStatus());
             throw new IllegalStateException("Endast väntande vänförfrågningar kan avslås.");
         }
 
         if (!friendship.getReceiver().getId().equals(userId)) {
+            logger.warn("Användare {} är inte mottagare av vänskapsförfrågan {}", userId, friendshipId);
             throw new IllegalArgumentException("Endast mottagaren kan avslå vänförfrågan.");
         }
 
@@ -105,6 +137,13 @@ public class FriendshipService {
         return friendshipMapper.toDto(friendship);
     }
 
+    /**
+     * Metod som hämtar inkommande vänförfrågningar för en användare.
+     *
+     * @param userId   - användarens ID
+     * @param pageable - pagineringsinställningar
+     * @return Page<Friendship> - inkommande förfrågningar
+     */
     public Page<Friendship> getIncomingFriendRequests(Long userId, Pageable pageable) {
         logger.info("Hämtar inkommande vänförfrågningar för användare {} med pageable: {}", userId, pageable);
         return friendshipRepository.findByReceiverIdAndStatus(
@@ -114,6 +153,13 @@ public class FriendshipService {
         );
     }
 
+    /**
+     * Metod som hämtar utgående vänförfrågningar för en användare.
+     *
+     * @param userId   - användarens ID
+     * @param pageable - pagineringsinställningar
+     * @return Page<Friendship> - skickade förfrågningar
+     */
     public Page<Friendship> getOutgoingFriendRequests(Long userId, Pageable pageable) {
         logger.info("Hämtar utgående vänförfrågningar för användare {} med pageable: {}", userId, pageable);
         return friendshipRepository.findByRequesterIdAndStatus(
@@ -123,6 +169,13 @@ public class FriendshipService {
         );
     }
 
+    /**
+     * Metod som hämtar alla accepterade vänner för en användare.
+     *
+     * @param userId   - användarens ID
+     * @param pageable - pagineringsinställningar
+     * @return Page<User> - lista med vänner
+     */
     public Page<User> getFriends(Long userId, Pageable pageable) {
         logger.info("Hämtar vänner för användare {} med pageable: {}", userId, pageable);
         List<Friendship> requested = friendshipRepository.findByRequesterIdAndStatus(
@@ -151,22 +204,41 @@ public class FriendshipService {
         int end = Math.min((start + pageable.getPageSize()), friends.size());
 
         if (start >= friends.size()) {
+            logger.debug("Hämtar vänner - page start {} >= antal vänner {} för användare {}", start, friends.size(), userId);
             return new PageImpl<>(Collections.emptyList(), pageable, friends.size());
         }
 
         List<User> pagedFriends = friends.subList(start, end);
-
-        return new PageImpl<>(pagedFriends, pageable, friends.size());
+        Page<User> result = new PageImpl<>(pagedFriends, pageable, friends.size());
+        logger.info("Hämtar vänner och returnerar sida med {} element (totalt {}) för användare {}", pagedFriends.size(), friends.size(), userId);
+        return result;
     }
 
+    /**
+     * Metod som hämtar alla relationer där användaren är requester eller receiver.
+     *
+     * @param userId - användarens ID
+     * @return lista med relationer
+     */
     public List<Friendship> getFriendshipsAllRelations(Long userId) {
+        logger.info("Hämtar alla vänskapsrelationer för användare ={}", userId);
         List<Friendship> list = friendshipRepository.findByRequesterIdOrReceiverId(userId, userId);
+        int size = list != null ? list.size() : 0;
+        logger.debug("Hämtar alla vänskapsrelationer - hittade : {} relationer för användare {}", size, userId);
         return list != null ? list : List.of();
     }
 
+    /**
+     * Metod som hämtar vänskapsstatus mellan två användare.
+     *
+     * @param currentUserId - inloggad användares ID
+     * @param profileUserId - profilens användar-ID
+     * @return FriendshipStatusResponseDTO - status och relationens metadata
+     */
     public FriendshipStatusResponseDTO getStatus(Long currentUserId, Long profileUserId) {
-        return friendshipRepository
-                .findByUsers(currentUserId, profileUserId)
+        logger.info("Hämtar status för inloggad användare = {}- profilens användare={}", currentUserId, profileUserId);
+        var opt = friendshipRepository.findByUsers(currentUserId, profileUserId);
+        FriendshipStatusResponseDTO dto = opt
                 .map(f -> new FriendshipStatusResponseDTO(
                         f.getStatus().name(),
                         f.getId(),
@@ -174,5 +246,7 @@ public class FriendshipService {
                         f.getReceiver().getId()
                 ))
                 .orElse(new FriendshipStatusResponseDTO("NONE", null, null, null));
+        logger.debug("Hämtar relationsstatus - resultat för användare {} och {}: {}", currentUserId, profileUserId, dto);
+        return dto;
     }
 }
