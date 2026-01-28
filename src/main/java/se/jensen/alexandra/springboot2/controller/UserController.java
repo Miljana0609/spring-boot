@@ -56,7 +56,6 @@ public class UserController {
      * @param authentication - Detaljer om den inloggade användare
      * @return - Information om den inloggade användare
      */
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> getMe
     (Authentication authentication) {
