@@ -22,6 +22,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testklass som ansvarar för att testa metoderna i FriendshipService.
+ * Använder mockade beroenden för att simulera interaktioner med repository‑lager och mapper.
+ */
 @ExtendWith(MockitoExtension.class)
 class FriendshipServiceTest {
 
@@ -47,6 +51,10 @@ class FriendshipServiceTest {
                 userService, friendshipRepository, userRepository, friendshipMapper);
     }
 
+    /**
+     * Testar att en vänförfrågan skickas korrekt.
+     * Verifierar att rätt data sparas och att DTO returneras som förväntat.
+     */
     @Test
     void sendFriendRequest_success() {
         Long requesterId = 1L;
@@ -80,6 +88,10 @@ class FriendshipServiceTest {
         saved.setId(10L);
     }
 
+    /**
+     * Testar att ett undantag kastas om en relation redan finns mellan två användare.
+     * Säkerställer att ingen ny relation sparas i databasen.
+     */
     @Test
     void sendFriendRequest_alreadyExists_throws() {
         Long requesterId = 1L;
@@ -98,6 +110,10 @@ class FriendshipServiceTest {
         verify(friendshipRepository, never()).save(any());
     }
 
+    /**
+     * Testar att en vänförfrågan accepteras korrekt.
+     * Verifierar att status uppdateras och att DTO returneras.
+     */
     @Test
     void acceptFriendRequest_success() {
         Long requesterId = 1L;
@@ -105,7 +121,7 @@ class FriendshipServiceTest {
 
         User requester = user(requesterId);
         User receiver = user(receiverId);
-        
+
         Friendship f = friendship(5L, requester, receiver, Friendship.Status.PENDING);
 
         when(friendshipRepository.findById(5L)).thenReturn(Optional.of(f));
@@ -122,6 +138,10 @@ class FriendshipServiceTest {
         verify(friendshipRepository).save(f);
     }
 
+    /**
+     * Testar att alla relationer för en användare hämtas korrekt.
+     * Säkerställer att listan returneras med förväntat innehåll.
+     */
     @Test
     void getFriendshipsAllRelations_returnsList() {
         Long userId = 1L;
@@ -135,16 +155,25 @@ class FriendshipServiceTest {
         assertEquals(f, result.get(0));
     }
 
+    /**
+     * Hjälpmetod för att skapa en User med angivet ID för teständamål.
+     */
     private User user(Long id) {
         User user = new User();
         user.setId(id);
         return user;
     }
 
+    /**
+     * Hjälpmetod för att skapa en UserResponseDTO med standardvärden för teständamål.
+     */
     private UserResponseDTO userDto(Long id) {
         return new UserResponseDTO(id, "name", "user@example.com", "User", "user", "bio", null);
     }
 
+    /**
+     * Hjälpmetod för att skapa en Friendship med angivna värden för teständamål.
+     */
     private Friendship friendship(Long id, User requester, User receiver, Friendship.Status status) {
         Friendship friendship = new Friendship();
         friendship.setId(id);

@@ -1,5 +1,10 @@
 package se.jensen.alexandra.springboot2.dto;
 
+/**
+ * En builder-klass som används för att skapa instanser av FriendshipResponseDTO.
+ * Tillåter stegvis uppbyggnad av DTO:n för ökad läsbarhet och flexibilitet.
+ */
+
 public final class FriendshipResponseDTOBuilder {
     private Long id;
     private UserResponseDTO requester;

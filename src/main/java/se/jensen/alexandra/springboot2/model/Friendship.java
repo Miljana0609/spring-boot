@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entitet som representerar en vänskapsrelation mellan två användare.
+ */
 @Entity
 public class Friendship {
     @Id
