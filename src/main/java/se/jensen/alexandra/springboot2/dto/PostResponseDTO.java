@@ -17,6 +17,8 @@ public record PostResponseDTO(
         String text,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         LocalDateTime createdAt,
-        Long userId
+        Long userId,
+        int likeCount,
+        boolean likedByMe
 ) {
 }

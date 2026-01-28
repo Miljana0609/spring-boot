@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Post-klassen är en entitetsklass som representerar inlägg i systemet och motsvarar tabellen posts i databasen.
@@ -28,10 +30,19 @@ public class Post {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    public Post(Long id, String text, LocalDateTime createdAt) {
+    @ManyToMany
+    @JoinTable(
+            name = "post_likes",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> likedBy = new HashSet<>();
+
+    public Post(Long id, String text, LocalDateTime createdAt, Set<User> likedBy) {
         this.id = id;
         this.text = text;
         this.createdAt = createdAt;
+        this.likedBy = likedBy;
     }
 
     public Post() {
@@ -60,6 +71,14 @@ public class Post {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public Set<User> getLikedBy() {
+        return likedBy;
+    }
+
+    public void setLikedBy(Set<User> likedBy) {
+        this.likedBy = likedBy;
     }
 
     @Override
