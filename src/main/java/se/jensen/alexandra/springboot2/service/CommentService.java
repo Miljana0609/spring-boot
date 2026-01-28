@@ -16,6 +16,10 @@ import se.jensen.alexandra.springboot2.repository.UserRepository;
 
 import java.util.NoSuchElementException;
 
+/**
+ * En service klass som innehåller all affärslogik för kommentarer.
+ * Här hanteras skapande, hämtning, uppdatering, borttagning och gilla-markeringar.
+ */
 @Service
 public class CommentService {
 
@@ -32,6 +36,15 @@ public class CommentService {
         this.commentMapper = commentMapper;
     }
 
+    /**
+     * Metod som skapar och sparar en ny kommentar.
+     * Kontrollerar så att användaren och inlägget finns på riktigt.
+     * Kan även skapa ett svar på en befintlig kommentar.
+     *
+     * @param dto      - data för den nya kommentaren
+     * @param username - anvöndarnamn på den inloggade användaren
+     * @return - den skapade kommentaren som DTO
+     */
     public CommentResponseDTO createComment(
             CommentRequestDTO dto, String username) {
 
@@ -55,6 +68,14 @@ public class CommentService {
         return commentMapper.toDto(saved, user);
     }
 
+    /**
+     * Hämtar listan med kommentarer för ett visst inlägg.
+     *
+     * @param postId   - inläggets id
+     * @param pageable - information om sida och paginering
+     * @param username - användarnamn
+     * @return - en sida med kommentarer som DTO
+     */
     public Page<CommentResponseDTO> getCommentsForPost(
             Long postId, Pageable pageable, String username) {
 
@@ -64,6 +85,13 @@ public class CommentService {
                 .map(c -> commentMapper.toDto(c, currentUser));
     }
 
+    /**
+     * Metod som lägger till eller tar bort en gilla-markering på en kommentar.
+     * Om användaren redan gillat kommentaren tas markeringen bort.
+     *
+     * @param commentId - id på kommentaren
+     * @param username  - användare som är inloggad
+     */
     public void toggleLike(Long commentId, String username) {
         User user = userRepository.findByUsername(username).orElseThrow();
         Comment comment = commentRepository.findById(commentId).orElseThrow();
@@ -76,6 +104,15 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
+    /**
+     * Uppdaterar innehållet i en kommentar.
+     * Kontrollerar först så att det är rätt person som försöker ändra den.
+     *
+     * @param commentId  - id på kommentaren
+     * @param newContent - nytt innehåll
+     * @param username   - användare som är inloggad
+     * @return - den uppdaterade kommentaren som DTO
+     */
     public CommentResponseDTO updateComment(Long commentId, String newContent, String username) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NoSuchElementException("Kommentaren hittades inte"));
@@ -91,6 +128,13 @@ public class CommentService {
 
     }
 
+    /**
+     * Tar bort en kommentar.
+     * Kontrollerar först att den användare äger kommentare.
+     *
+     * @param commentId - id på kommentaren
+     * @param username  - användare
+     */
     public void deleteComment(Long commentId, String username) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NoSuchElementException("Kommentaren hittade inte med id: " + commentId));

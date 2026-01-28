@@ -11,6 +11,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * En klass som representerar tabellen "comments" i databasen.
+ * Innehåller all information om en kommentar.
+ */
 @Entity
 @Table(name = "comments")
 public class Comment {
@@ -19,32 +23,38 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Användaren som skrev kommentaren
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;
 
+    // Inlägget som kommentaren hör till
     @ManyToOne(optional = false)
     @JoinColumn(name = "post_id")
     private Post post;
 
-    //För svar på kommentarer
+    // Kommentar som denna kommentar svarar på (null om huvudkommentar)
     @ManyToOne
     @JoinColumn(name = "parentComment_id")
     private Comment parentComment;
 
+    // Lista med svar på denna kommentar
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.REMOVE)
     private List<Comment> replies = new ArrayList<>();
 
+    // Själva textinnehållet i kommentaren
     @Column(nullable = false, length = 1000)
     private String content;
 
+    // Tidpunkt när den skapades
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    // Tidpunkt när den senast uppdaterades
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    // Likes
+    // Användare som har gillat kommentaren
     @ManyToMany
     @JoinTable(
             name = "comment_likes",

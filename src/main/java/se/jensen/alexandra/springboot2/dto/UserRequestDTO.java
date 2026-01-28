@@ -8,14 +8,13 @@ import jakarta.validation.constraints.Size;
 /**
  * En klass som används när man skapar eller uppdaterar en användare. Tar emot data från frontend.
  *
- * @param id
- * @param username
- * @param email
- * @param password
- * @param role
- * @param displayName
- * @param bio
- * @param profileImagePath
+ * @param id               - users id
+ * @param username         - användarnamn
+ * @param email            - e-postadress
+ * @param role             - roll (ADMIN/USER)
+ * @param displayName      - visningsnamn
+ * @param bio              - beskrivning
+ * @param profileImagePath - bild
  */
 public record UserRequestDTO(
         Long id,
