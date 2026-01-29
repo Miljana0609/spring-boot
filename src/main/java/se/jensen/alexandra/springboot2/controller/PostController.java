@@ -91,6 +91,13 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Metod som gör att man kan gilla eller ta bort gilla-markering på ett inlägg.
+     *
+     * @param id             - ID för det inlägg man vill gilla.
+     * @param authentication - Information om vem det är som klickar på gilla-knappen.
+     * @return - Svarar med 200 OK när det är klart.
+     */
     @PostMapping("/{id}/like")
     public ResponseEntity<Void> likePost(@PathVariable Long id, Authentication authentication) {
         postService.toggleLike(id, authentication.getName());
