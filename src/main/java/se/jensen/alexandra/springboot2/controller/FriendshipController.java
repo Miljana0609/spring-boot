@@ -21,6 +21,12 @@ import se.jensen.alexandra.springboot2.service.UserService;
 
 import java.util.List;
 
+
+/**
+ * En REST-kontroller som hanterar alla anrop relaterade till vänskapsrelationer,
+ * såsom att skicka vänförfrågningar, acceptera eller avvisa dem samt
+ * hämta vänlistor och status mellan användare.
+ */
 @RestController
 @RequestMapping("/friendships")
 public class FriendshipController {
@@ -36,6 +42,15 @@ public class FriendshipController {
         this.userService = userService;
     }
 
+    /**
+     * Hämtar vänskapsstatus mellan den inloggade användaren och en annan användare.
+     * Statusen kan exempelvis vara: ingen relation, skickad förfrågan,
+     * mottagen förfrågan eller vänner.
+     *
+     * @param userId         - ID på användaren som statusen ska kontrolleras mot
+     * @param authentication - inloggad användare
+     * @return - ett DTO-objekt som beskriver vänskapsstatusen
+     */
     @GetMapping("/status")
     public FriendshipStatusResponseDTO getStatus(
             @RequestParam Long userId,
@@ -46,15 +61,28 @@ public class FriendshipController {
         return friendshipService.getStatus(currentUser.id(), userId);
     }
 
+    /**
+     * Skapar och skickar en ny vänförfrågan mellan två användare.
+     *
+     * @param dto - information om avsändare och mottagare av vänförfrågan
+     * @return - den skapade vänskapsrelationen
+     */
     @PostMapping
     public ResponseEntity<FriendshipResponseDTO> createFriendship
-            (@Valid @RequestBody FriendshipRequestDTO dto) {
+    (@Valid @RequestBody FriendshipRequestDTO dto) {
 
         FriendshipResponseDTO response = friendshipService.sendFriendRequest(dto.requesterId(), dto.receiverId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Hämtar alla vänskapsrelationer för en användare,
+     * oavsett om relationen är accepterad, väntande eller avslagen.
+     *
+     * @param id - användarens ID
+     * @return - en lista med alla vänskapsrelationer
+     */
     @GetMapping("/{id}")
     public ResponseEntity<List<FriendshipResponseDTO>> getFriendshipsAllRelations(
             @PathVariable Long id) {
@@ -68,6 +96,13 @@ public class FriendshipController {
         return ResponseEntity.ok(dtos);
     }
 
+    /**
+     * Accepterar en inkommande vänförfrågan.
+     *
+     * @param id     - ID på vänskapsförfrågan
+     * @param userId - ID på användaren som accepterar förfrågan
+     * @return - den uppdaterade vänskapsrelationen
+     */
     @PutMapping("/{id}/accept")
     public ResponseEntity<FriendshipResponseDTO> acceptFriendship(
             @PathVariable Long id,
@@ -78,6 +113,13 @@ public class FriendshipController {
         return ResponseEntity.ok(accept);
     }
 
+    /**
+     * Avvisar en inkommande vänförfrågan.
+     *
+     * @param id     - ID på vänskapsförfrågan
+     * @param userId - ID på användaren som avvisar förfrågan
+     * @return - den uppdaterade vänskapsrelationen
+     */
     @PutMapping("/{id}/reject")
     public ResponseEntity<FriendshipResponseDTO> rejectFriendship(
             @PathVariable Long id,
@@ -88,6 +130,14 @@ public class FriendshipController {
         return ResponseEntity.ok(reject);
     }
 
+    /**
+     * Hämtar en paginerad lista med alla accepterade vänner
+     * för en specifik användare.
+     *
+     * @param id       - användarens ID
+     * @param pageable - information om sida, storlek och sortering
+     * @return - en lista med användare som är vänner
+     */
     @GetMapping("/users/{id}/friends")
     public ResponseEntity<List<UserResponseDTO>> getFriendsByUserId(
             @PathVariable Long id,
@@ -106,6 +156,14 @@ public class FriendshipController {
         return ResponseEntity.ok(dtos);
     }
 
+    /**
+     * Hämtar en paginerad lista med inkommande vänförfrågningar
+     * för en specifik användare.
+     *
+     * @param id       - användarens ID
+     * @param pageable - information om sida, storlek och sortering
+     * @return - en lista med mottagna vänförfrågningar
+     */
     @GetMapping("/users/{id}/requests")
     public ResponseEntity<List<FriendshipResponseDTO>> getReceivedRequests(
             @PathVariable Long id,

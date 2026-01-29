@@ -71,6 +71,7 @@ public class SecurityConfig {
                 .requestMatchers("/request-token").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+                .requestMatchers(HttpMethod.GET, "/users/*/profile-image").permitAll()
                 .requestMatchers(//Raden ovan och de tre nedan öppnar upp för att vem som helst ska kunna
                         "/swagger-ui/**",   //gå in och skapa en ny user, detta för att vi i övrigt låst applikationen
                         "/v3/api-docs/**",  //Vi kan därmed skapa ett konto som har Admin för att sedan låsa framöver

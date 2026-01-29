@@ -2,11 +2,15 @@ package se.jensen.alexandra.springboot2.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import se.jensen.alexandra.springboot2.dto.*;
 import se.jensen.alexandra.springboot2.mapper.PostMapper;
 import se.jensen.alexandra.springboot2.mapper.UserMapper;
@@ -15,9 +19,15 @@ import se.jensen.alexandra.springboot2.repository.PostRepository;
 import se.jensen.alexandra.springboot2.repository.UserRepository;
 import se.jensen.alexandra.springboot2.security.MyUserDetails;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * En serviceklass som hanterar allt som har med användare(user) att göra, inklusive deras inlägg(posts)
@@ -30,6 +40,11 @@ public class UserService {
     private final PostMapper postMapper;
     private final PasswordEncoder passwordEncoder;
     private final PostRepository postRepository;
+
+    private static final long MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+    private static final List<String> ALLOWED_TYPES =
+            List.of("image/jpeg", "image/png");
+    private final Path uploadDir = Paths.get("uploads/profile-images");
 
     public UserService(UserRepository userRepository, UserMapper userMapper, PostMapper postMapper, PasswordEncoder passwordEncoder, PostRepository postRepository) {
         this.userRepository = userRepository;
@@ -269,6 +284,93 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("Användare hittades inte:" + username));
         return userMapper.toDto(user);
+    }
+
+    /**
+     * Sparar en profilbild för den inloggade användaren.
+     * Metoden validerar filen (typ, storlek, innehåll), tar bort eventuell
+     * tidigare uppladdad profilbild och sparar den nya bilden på filsystemet.
+     * Sökvägen till bilden lagras därefter i databasen.
+     *
+     * @param file     - bildfilen som ska laddas upp
+     * @param username - användarnamnet för den inloggade användaren
+     * @throws IllegalArgumentException om filen är ogiltig eller för stor
+     * @throws RuntimeException         om bilden inte kan sparas
+     */
+    public void saveProfileImage(MultipartFile file, String username) {
+        // 1. Validera filen
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Ingen fil vald");
+        }
+
+        if (!ALLOWED_TYPES.contains(file.getContentType())) {
+            throw new IllegalArgumentException("Ogiltig filtyp");
+        }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("Filen är för stor");
+        }
+
+        // 2. Hämta användaren
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("Användare finns inte"));
+
+        try {
+            Files.createDirectories(uploadDir);
+
+            // 3. Radera gammal bild om den finns (inte default-avatar)
+            if (user.getProfileImagePath() != null && !user.getProfileImagePath().contains("default-avatar.png")) {
+                Path oldImagePath = uploadDir.resolve(Paths.get(user.getProfileImagePath()).getFileName());
+                if (Files.exists(oldImagePath)) {
+                    Files.delete(oldImagePath);
+                }
+            }
+
+            // 4. Skapa nytt filnamn
+            String filename = user.getId() + "_" + UUID.randomUUID() + ".jpg";
+            Path filePath = uploadDir.resolve(filename);
+
+            // 5. Spara nya bilden
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // 6. Spara sökväg i databasen
+            user.setProfileImagePath("/images/" + filename);
+            userRepository.save(user);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Kunde inte spara bilden", e);
+        }
+    }
+
+    /**
+     * Hämtar profilbilden för en specifik användare.
+     * Om användaren inte har någon sparad profilbild returneras
+     * en standardbild (default-avatar).
+     *
+     * @param id - användarens ID
+     * @return - bildresurs (uppladdad bild eller standardbild)
+     * @throws RuntimeException om bilden inte kan laddas
+     */
+    public Resource getProfileImage(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Användare finns inte"));
+
+        String path = user.getProfileImagePath();
+
+        try {
+            if (path != null && !path.isEmpty()) {
+                Path imagePath = uploadDir.resolve(Paths.get(path).getFileName());
+                if (Files.exists(imagePath)) {
+                    return new UrlResource(imagePath.toUri());
+                }
+            }
+
+            // Returnera default om ingen bild finns
+            return new ClassPathResource("static/default-avatar.png");
+
+        } catch (Exception e) {
+            throw new RuntimeException("Could not load profile image", e);
+        }
     }
 }
 
