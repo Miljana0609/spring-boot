@@ -2,15 +2,20 @@ package se.jensen.alexandra.springboot2.controller;
 
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import se.jensen.alexandra.springboot2.dto.*;
 import se.jensen.alexandra.springboot2.model.User;
 import se.jensen.alexandra.springboot2.repository.UserRepository;
@@ -195,5 +200,50 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    /**
+     * Laddar upp och sparar en profilbild för den inloggade användaren.
+     * Den uppladdade bilden kopplas till användarens konto
+     *
+     * @param file           - bildfilen som ska laddas upp
+     * @param authentication - inloggad användare
+     * @return - tomt svar med statuskod 200 vid lyckad uppladdning
+     */
+    @PostMapping("/me/profile-image")
+    public ResponseEntity<Void> uploadProfileImage(
+            @RequestParam("file") MultipartFile file,
+            Authentication authentication
+    ) {
+        userService.saveProfileImage(file, authentication.getName());
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Hämtar profilbilden för en specifik användare.
+     * Om användaren inte har laddat upp någon egen profilbild
+     * returneras en standardbild (default-avatar).
+     *
+     * @param id - användarens ID
+     * @return - bildresurs med content-type (JPEG eller PNG)
+     */
+    @GetMapping("/{id}/profile-image")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Resource> getProfileImage(
+            @PathVariable Long id
+    ) {
+        Resource image = userService.getProfileImage(id);
+
+        MediaType contentType = MediaType.IMAGE_JPEG;
+        if (image.getFilename() != null && image.getFilename().endsWith(".png")) {
+            contentType = MediaType.IMAGE_PNG;
+        }
+
+        String source = image instanceof ClassPathResource ? "default-avatar" : "uploaded-image";
+
+        return ResponseEntity.ok()
+                .header("X-Image-Source", source)
+                .contentType(contentType)
+                .cacheControl(CacheControl.noCache())
+                .body(image);
+    }
 
 }

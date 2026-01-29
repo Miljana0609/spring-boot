@@ -21,10 +21,11 @@ import se.jensen.alexandra.springboot2.service.UserService;
 
 import java.util.List;
 
+
 /**
- * Controller för alla vänskapsrelaterade operationer.
- * Hanterar vänförfrågningar, status, accepterade relationer och listning av vänner.
- * Alla endpoints ligger under /friendships.
+ * En REST-kontroller som hanterar alla anrop relaterade till vänskapsrelationer,
+ * såsom att skicka vänförfrågningar, acceptera eller avvisa dem samt
+ * hämta vänlistor och status mellan användare.
  */
 @RestController
 @RequestMapping("/friendships")
@@ -34,14 +35,6 @@ public class FriendshipController {
     private final UserMapper userMapper;
     private final UserService userService;
 
-    /**
-     * Skapar en ny instans av FriendshipController.
-     *
-     * @param friendshipService service för vänskapslogik
-     * @param friendshipMapper  mapper för att konvertera Friendship → DTO
-     * @param userMapper        mapper för att konvertera User → DTO
-     * @param userService       service för användarhantering
-     */
     public FriendshipController(FriendshipService friendshipService, FriendshipMapper friendshipMapper, UserMapper userMapper, UserService userService) {
         this.friendshipService = friendshipService;
         this.friendshipMapper = friendshipMapper;
@@ -51,10 +44,12 @@ public class FriendshipController {
 
     /**
      * Hämtar vänskapsstatus mellan den inloggade användaren och en annan användare.
+     * Statusen kan exempelvis vara: ingen relation, skickad förfrågan,
+     * mottagen förfrågan eller vänner.
      *
-     * @param userId         ID för användaren som ska jämföras med den inloggade
-     * @param authentication autentiseringsobjekt som innehåller inloggad användares info
-     * @return DTO som beskriver relationens status (NONE, PENDING, ACCEPTED)
+     * @param userId         - ID på användaren som statusen ska kontrolleras mot
+     * @param authentication - inloggad användare
+     * @return - ett DTO-objekt som beskriver vänskapsstatusen
      */
     @GetMapping("/status")
     public FriendshipStatusResponseDTO getStatus(
@@ -67,10 +62,10 @@ public class FriendshipController {
     }
 
     /**
-     * Skickar en vänförfrågan från en användare till en annan.
+     * Skapar och skickar en ny vänförfrågan mellan två användare.
      *
-     * @param dto innehåller requesterId och receiverId
-     * @return skapad vänförfrågan som DTO
+     * @param dto - information om avsändare och mottagare av vänförfrågan
+     * @return - den skapade vänskapsrelationen
      */
     @PostMapping
     public ResponseEntity<FriendshipResponseDTO> createFriendship
@@ -82,11 +77,11 @@ public class FriendshipController {
     }
 
     /**
-     * Hämtar alla vänskapsrelationer (både skickade och mottagna)
-     * för en specifik användare.
+     * Hämtar alla vänskapsrelationer för en användare,
+     * oavsett om relationen är accepterad, väntande eller avslagen.
      *
-     * @param id användarens ID
-     * @return lista av alla relationer som DTO
+     * @param id - användarens ID
+     * @return - en lista med alla vänskapsrelationer
      */
     @GetMapping("/{id}")
     public ResponseEntity<List<FriendshipResponseDTO>> getFriendshipsAllRelations(
@@ -102,11 +97,11 @@ public class FriendshipController {
     }
 
     /**
-     * Accepterar en vänförfrågan.
+     * Accepterar en inkommande vänförfrågan.
      *
-     * @param id     vänförfrågans ID
-     * @param userId ID för användaren som accepterar
-     * @return uppdaterad vänskapsrelation som DTO
+     * @param id     - ID på vänskapsförfrågan
+     * @param userId - ID på användaren som accepterar förfrågan
+     * @return - den uppdaterade vänskapsrelationen
      */
     @PutMapping("/{id}/accept")
     public ResponseEntity<FriendshipResponseDTO> acceptFriendship(
@@ -119,11 +114,11 @@ public class FriendshipController {
     }
 
     /**
-     * Avvisar en vänförfrågan.
+     * Avvisar en inkommande vänförfrågan.
      *
-     * @param id     vänförfrågans ID
-     * @param userId ID för användaren som avvisar
-     * @return uppdaterad vänskapsrelation som DTO
+     * @param id     - ID på vänskapsförfrågan
+     * @param userId - ID på användaren som avvisar förfrågan
+     * @return - den uppdaterade vänskapsrelationen
      */
     @PutMapping("/{id}/reject")
     public ResponseEntity<FriendshipResponseDTO> rejectFriendship(
@@ -136,11 +131,12 @@ public class FriendshipController {
     }
 
     /**
-     * Hämtar en lista över en användares vänner.
+     * Hämtar en paginerad lista med alla accepterade vänner
+     * för en specifik användare.
      *
-     * @param id       användarens ID
-     * @param pageable pagineringsinställningar
-     * @return lista av användare som DTO
+     * @param id       - användarens ID
+     * @param pageable - information om sida, storlek och sortering
+     * @return - en lista med användare som är vänner
      */
     @GetMapping("/users/{id}/friends")
     public ResponseEntity<List<UserResponseDTO>> getFriendsByUserId(
@@ -161,11 +157,12 @@ public class FriendshipController {
     }
 
     /**
-     * Hämtar alla inkommande vänförfrågningar för en användare.
+     * Hämtar en paginerad lista med inkommande vänförfrågningar
+     * för en specifik användare.
      *
-     * @param id       användarens ID
-     * @param pageable pagineringsinställningar
-     * @return lista av vänförfrågningar som DTO
+     * @param id       - användarens ID
+     * @param pageable - information om sida, storlek och sortering
+     * @return - en lista med mottagna vänförfrågningar
      */
     @GetMapping("/users/{id}/requests")
     public ResponseEntity<List<FriendshipResponseDTO>> getReceivedRequests(
