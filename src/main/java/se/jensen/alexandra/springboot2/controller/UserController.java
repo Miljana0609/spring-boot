@@ -200,6 +200,14 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    /**
+     * Laddar upp och sparar en profilbild för den inloggade användaren.
+     * Den uppladdade bilden kopplas till användarens konto
+     *
+     * @param file           - bildfilen som ska laddas upp
+     * @param authentication - inloggad användare
+     * @return - tomt svar med statuskod 200 vid lyckad uppladdning
+     */
     @PostMapping("/me/profile-image")
     public ResponseEntity<Void> uploadProfileImage(
             @RequestParam("file") MultipartFile file,
@@ -209,6 +217,14 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Hämtar profilbilden för en specifik användare.
+     * Om användaren inte har laddat upp någon egen profilbild
+     * returneras en standardbild (default-avatar).
+     *
+     * @param id - användarens ID
+     * @return - bildresurs med content-type (JPEG eller PNG)
+     */
     @GetMapping("/{id}/profile-image")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Resource> getProfileImage(

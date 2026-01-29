@@ -286,6 +286,17 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
+    /**
+     * Sparar en profilbild för den inloggade användaren.
+     * Metoden validerar filen (typ, storlek, innehåll), tar bort eventuell
+     * tidigare uppladdad profilbild och sparar den nya bilden på filsystemet.
+     * Sökvägen till bilden lagras därefter i databasen.
+     *
+     * @param file     - bildfilen som ska laddas upp
+     * @param username - användarnamnet för den inloggade användaren
+     * @throws IllegalArgumentException om filen är ogiltig eller för stor
+     * @throws RuntimeException         om bilden inte kan sparas
+     */
     public void saveProfileImage(MultipartFile file, String username) {
         // 1. Validera filen
         if (file.isEmpty()) {
@@ -331,6 +342,15 @@ public class UserService {
         }
     }
 
+    /**
+     * Hämtar profilbilden för en specifik användare.
+     * Om användaren inte har någon sparad profilbild returneras
+     * en standardbild (default-avatar).
+     *
+     * @param id - användarens ID
+     * @return - bildresurs (uppladdad bild eller standardbild)
+     * @throws RuntimeException om bilden inte kan laddas
+     */
     public Resource getProfileImage(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Användare finns inte"));
