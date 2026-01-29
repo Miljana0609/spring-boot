@@ -78,6 +78,7 @@ public class SecurityConfig {
                         "/swagger-ui.html"
                 ).permitAll() //Hoppas det uppdateras nu
                 .requestMatchers("/public/**").permitAll()
+                .requestMatchers("/comments/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")

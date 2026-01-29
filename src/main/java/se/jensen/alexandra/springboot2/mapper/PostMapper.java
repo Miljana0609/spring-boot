@@ -5,6 +5,7 @@ import se.jensen.alexandra.springboot2.dto.PostRequestDTO;
 import se.jensen.alexandra.springboot2.dto.PostResponseDTO;
 import se.jensen.alexandra.springboot2.dto.PostResponseDTOBuilder;
 import se.jensen.alexandra.springboot2.model.Post;
+import se.jensen.alexandra.springboot2.model.User;
 
 /**
  * En hjälpklass som används för att omvandla mellan Post och PostRequestDTO/PostResponseDTO.
@@ -19,13 +20,15 @@ public class PostMapper {
      * @param post - Post-objekt
      * @return PostResponseDTO - information om ett inlägg
      */
-    public PostResponseDTO toDto(Post post) {
+    public PostResponseDTO toDto(Post post, User currentUser) {
         return PostResponseDTOBuilder.builder()
                 .id(post.getId())
                 .username(post.getUser().getUsername())
                 .text(post.getText())
                 .createdAt(post.getCreatedAt())
                 .userId(post.getUser().getId())
+                .likeCount(post.getLikedBy() != null ? post.getLikedBy().size() : 0)
+                .likedByMe(currentUser != null && post.getLikedBy() != null && post.getLikedBy().contains(currentUser))
                 .build();
     }
 

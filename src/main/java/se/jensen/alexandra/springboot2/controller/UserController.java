@@ -156,11 +156,14 @@ public class UserController {
                     size = 5,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC)
-            Pageable pageable
+            Pageable pageable,
+            Authentication authentication
     ) {
         int size = pageable.getPageSize() <= 0 ? 5 : Math.min(pageable.getPageSize(), 5);
         Pageable fixed = PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
-        return userService.getUserWithPosts(id, fixed);
+
+        String currentUsername = (authentication != null) ? authentication.getName() : null;
+        return userService.getUserWithPosts(id, fixed, currentUsername);
     }
 
     /**

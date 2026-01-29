@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import se.jensen.alexandra.springboot2.dto.PostRequestDTO;
 import se.jensen.alexandra.springboot2.dto.PostResponseDTO;
@@ -40,16 +41,17 @@ public class PostService {
      * @return Page<PostResponseDTO> som innehåller inläggens ID, text och datum när det skapades
      */
     //Finns redan i UserController/UserService
-    public Page<PostResponseDTO> getAllPosts(Pageable pageable) {
+    public Page<PostResponseDTO> getAllPosts(Pageable pageable, Authentication authentication) {
         logger.info("Hämtar alla inlägg med pageable: {}", pageable);
+
+        // Hitta den inloggade användaren (så att vi vet om hjärtat ska vara rött)
+        User currentUser = null;
+        if (authentication != null) {
+            currentUser = userRepository.findByUsername(authentication.getName()).orElse(null);
+        }
+        final User finalUser = currentUser;
         return postRepository.findAll(pageable)
-                .map(post -> new PostResponseDTO(
-                        post.getId(),
-                        post.getUser().getUsername(),
-                        post.getText(),
-                        post.getCreatedAt(),
-                        post.getUser().getId()
-                ));
+                .map(post -> postMapper.toDto(post, finalUser));
     }
 
     /**
@@ -63,7 +65,7 @@ public class PostService {
         Optional<Post> post = postRepository.findById(id);
         if (post.isPresent()) {
             Post realPost = post.get();
-            return postMapper.toDto(realPost);
+            return postMapper.toDto(realPost, null);
         } else {
             logger.warn("Inlägg med id {} hittades inte", id);
             throw new NoSuchElementException("Inget inlägg i databasen med id: " + id);
@@ -89,7 +91,7 @@ public class PostService {
         post.setUser(user);
         Post savedPost = postRepository.save(post);
         logger.info("Inlägg skapat med id: {}", savedPost.getId());
-        return new PostResponseDTO(savedPost.getId(), savedPost.getUser().getUsername(), savedPost.getText(), savedPost.getCreatedAt(), savedPost.getUser().getId());
+        return postMapper.toDto(savedPost, user);
     }
 
     /**
@@ -108,7 +110,7 @@ public class PostService {
             postMapper.updateEntityFromDto(postDto, post);
             Post updatedPost = postRepository.save(post);
             logger.info("Inlägg med id {} uppdaterat", id);
-            return postMapper.toDto(updatedPost);
+            return postMapper.toDto(updatedPost, null);
         } else {
             logger.warn("Kunde inte uppdatera. Inlägg med id {} hittades inte", id);
             throw new NoSuchElementException("Inget inlägg i databasen med id: " + id);
@@ -131,5 +133,25 @@ public class PostService {
             logger.warn("Kunde inte ta bort. Inlägg med id {} hittades inte", id);
             throw new NoSuchElementException("Inget inlägg i databasen med id: " + id);
         }
+    }
+
+    public void toggleLike(Long postId, String username) {
+        // 1. Hämta inlägget
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Inlägget hittades inte"));
+
+        // 2. Hämta användaren som gillar
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("Användaren hittades inte"));
+
+        // 3. Kolla om användaren redan har gillat
+        if (post.getLikedBy().contains(user)) {
+            post.getLikedBy().remove(user); // Ta bort like (Unlike)
+        } else {
+            post.getLikedBy().add(user);    // Lägg till like
+        }
+
+        // 4. Spara ändringen
+        postRepository.save(post);
     }
 }
