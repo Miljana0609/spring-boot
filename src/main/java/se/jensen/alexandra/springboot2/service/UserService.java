@@ -7,7 +7,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -328,8 +327,8 @@ public class UserService {
         }
     }
 
-    public Resource getProfileImage(String username, Authentication auth) {
-        User user = userRepository.findByUsername(username)
+    public Resource getProfileImage(Long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Användare finns inte"));
 
         String path = user.getProfileImagePath();
