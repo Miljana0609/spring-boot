@@ -135,22 +135,27 @@ public class PostService {
         }
     }
 
+    /**
+     * Lägger till eller tar bort en gilla-markering på ett inlägg.
+     * Om användaren redan har gillat inlägget tas markeringen bort,
+     * annars läggs en ny gilla-markering till.
+     *
+     * @param postId   - id på inlägget som gillas eller ogillas
+     * @param username - användare som är inloggad
+     */
     public void toggleLike(Long postId, String username) {
         // 1. Hämta inlägget
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new NoSuchElementException("Inlägget hittades inte"));
-
         // 2. Hämta användaren som gillar
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("Användaren hittades inte"));
-
         // 3. Kolla om användaren redan har gillat
         if (post.getLikedBy().contains(user)) {
             post.getLikedBy().remove(user); // Ta bort like (Unlike)
         } else {
             post.getLikedBy().add(user);    // Lägg till like
         }
-
         // 4. Spara ändringen
         postRepository.save(post);
     }
