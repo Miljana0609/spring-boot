@@ -1,47 +1,89 @@
-# Backend – Social Media Spring Boot API
+# 📱 Social Media API (Spring Boot)
 
-Detta projekt är ett gemensamt grupparbete där vi, tre personer, tillsammans byggde backend för en social media-applikation med Spring Boot som en del av en fullstack-applikation.
-Frontend-delen finns som ett separat projekt, kallat spring-boot-frontend.
-Under projektets gång har vi även fördjupat oss i Git och GitHub, lärt oss skapa branches, göra pull requests och samarbeta effektivt i en versionhanterad miljö.
+A backend REST API for a social media application built with Spring Boot.
+This project was developed as part of a team of three and focuses on building a scalable and secure backend for a fullstack application.
 
-## Syfte
-- Bygga en strukturerad backend med Spring Boot och PostgreSQL
-- Öva på OOP, JPA, DTO:er och validering
-- Implementera säkerhet, autentisering och behörigheter
-- Hantera data för användare, inlägg, kommentarer och gillningar
+The frontend is implemented in a separate project.
 
-## Funktionalitet
-- Registrering och inloggning av användare
-- Uppdatering av användarprofil (bio, displayName, profilbild)
-- Skapa, redigera och ta bort inlägg
-- Skapa, redigera och ta bort kommentarer
-- Gilla-markeringar för inlägg och kommentarer
-- Relationshantering mellan användare, inlägg och kommentarer (one-to-many)
-- CRUD-operationer via repositories och JPA
-- API-dokumentation via Swagger
-- Säkerhet med Spring Security och lösenords-kryptering
-- Databasanslutning konfigurerad via `application.properties` och miljövariabler
-- Transaktionshantering med `@Transactional` för korrekt laddning av relaterad data
+---
 
-## Deployment och miljö
-- Backend deployad via Koyeb
-- Databas hostad på Neon
-- Miljövariabler används för att koppla backend till databasen och för säker hantering av credentials  
-- Docker används för containerisering och enklare CI/CD med GitHub Actions
+## 🎯 Purpose
 
-## Struktur
-- Entities – User, Post, Comment, Like
-- Repositories – hanterar databasanrop
-- Services – affärslogik för CRUD och relationer
-- Controllers – REST-endpoints med ResponseEntity
-- DTOs – Request och Response DTOs för frontend-kommunikation
-- Security – SecurityConfig, password encoder och exception handling
-- Docker och CI/CD via GitHub Actions
+* Build a structured backend using Spring Boot and PostgreSQL
+* Apply object-oriented programming principles (OOP)
+* Work with JPA, DTOs, and validation
+* Implement authentication, authorization, and security
+* Manage relationships between users, posts, comments, and likes
 
-## Teknik
-- Java, Spring Boot
-- PostgreSQL
-- Spring Data JPA
-- Spring Security
-- Docker, Koyeb, Neon
-- Swagger / OpenAPI
+---
+
+## ✨ Features
+
+* User registration and authentication
+* User profile management (bio, display name, profile image)
+* Create, update, and delete posts
+* Create, update, and delete comments
+* Like functionality for posts and comments
+* Relationship handling (one-to-many between entities)
+* Full CRUD operations using Spring Data JPA
+* API documentation with Swagger / OpenAPI
+* Secure password handling with Spring Security
+* Transaction management using `@Transactional`
+
+---
+
+## 🛠 Tech Stack
+
+* Java
+* Spring Boot
+* Spring Data JPA
+* Spring Security
+* PostgreSQL
+
+---
+
+## ☁️ Deployment & Environment
+
+* Backend deployed on Koyeb
+* Database hosted on Neon
+* Environment variables used for secure configuration
+* Docker used for containerization
+* CI/CD pipeline implemented with GitHub Actions
+
+---
+
+## 🧱 Architecture
+
+The project follows a layered architecture:
+
+* **Entities** – User, Post, Comment, Like
+* **Repositories** – Database access layer
+* **Services** – Business logic and relationships
+* **Controllers** – REST endpoints
+* **DTOs** – Request and response objects
+* **Security** – Configuration, authentication, and exception handling
+
+---
+
+## 🧠 What I Learned
+
+* Collaborating in a team using Git and GitHub
+* Working with branches, pull requests, and code reviews
+* Designing a structured backend architecture
+* Managing complex entity relationships in a database
+* Implementing authentication and security in Spring Boot
+* Using Docker and CI/CD for deployment
+
+---
+
+## 🔗 Related Project
+
+Frontend for this application is available in a separate repository.
+
+---
+
+## 👨‍💻 About This Project
+
+This project was developed as part of a team effort to simulate real-world backend development, focusing on collaboration, clean architecture, and production-like setup.
+
+---
